@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: simple-shop
+
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/simpleshop
+    username: shop
+    password: shoppass
+    hikari:
+      maximum-pool-size: 10
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: false
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  mail:
+    host: localhost
+    port: 1025
+
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+
+  modulith:
+    events:
+      republish-outstanding-events-on-restart: true
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-}] [%X{spanId:-}] %-5level %logger{36} - %msg%n"
+  level:
+    com.simpleshop: DEBUG
+    org.springframework.modulith: DEBUG
+
+server:
+  port: 8080

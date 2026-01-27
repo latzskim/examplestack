@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Domain Unit Tests" verbose="1">
+    <test name="Shared Domain">
+        <packages>
+            <package name="com.simpleshop.shared.domain.*"/>
+        </packages>
+    </test>
+    <test name="Catalog Domain">
+        <packages>
+            <package name="com.simpleshop.catalog.domain.*"/>
+        </packages>
+    </test>
+    <test name="Inventory Domain">
+        <packages>
+            <package name="com.simpleshop.inventory.domain.*"/>
+        </packages>
+    </test>
+    <test name="Cart Domain">
+        <packages>
+            <package name="com.simpleshop.cart.domain.*"/>
+        </packages>
+    </test>
+    <test name="Order Domain">
+        <packages>
+            <package name="com.simpleshop.order.domain.*"/>
+        </packages>
+    </test>
+    <test name="Identity Domain">
+        <packages>
+            <package name="com.simpleshop.identity.domain.*"/>
+        </packages>
+    </test>
+    <test name="Shipping Domain">
+        <packages>
+            <package name="com.simpleshop.shipping.domain.*"/>
+        </packages>
+    </test>
+    <test name="Notification Domain">
+        <packages>
+            <package name="com.simpleshop.notification.domain.*"/>
+        </packages>
+    </test>
+</suite>
