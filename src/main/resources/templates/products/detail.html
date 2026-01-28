@@ -33,10 +33,19 @@
                     Category: <span th:text="${product.categoryName()}">Category</span>
                 </p>
                 
-                <h3 class="text-primary mb-4">
+                <h3 class="text-primary mb-3">
                     <span th:text="${#numbers.formatDecimal(product.price(), 1, 2)}">0.00</span>
                     <span th:text="${product.currency()}">USD</span>
                 </h3>
+                
+                <p class="mb-4">
+                    <span th:if="${stockAvailable > 0}" class="text-success fw-bold">
+                        <span th:text="${stockAvailable}">0</span> in stock
+                    </span>
+                    <span th:if="${stockAvailable == 0}" class="text-danger fw-bold">
+                        Out of Stock
+                    </span>
+                </p>
                 
                 <div th:if="${product.description() != null}" class="mb-4">
                     <h5>Description</h5>

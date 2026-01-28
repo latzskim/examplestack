@@ -4,6 +4,9 @@ import com.simpleshop.catalog.application.command.CreateProductCommand;
 import com.simpleshop.catalog.application.command.UpdateProductCommand;
 import com.simpleshop.catalog.application.port.in.*;
 import com.simpleshop.catalog.application.query.*;
+import com.simpleshop.inventory.application.port.in.CheckStockAvailabilityUseCase;
+import com.simpleshop.inventory.application.query.CheckStockAvailabilityQuery;
+import com.simpleshop.inventory.application.query.ProductAvailabilityView;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -25,6 +28,7 @@ public class AdminProductController {
     private final DeactivateProductUseCase deactivateProductUseCase;
     private final ActivateProductUseCase activateProductUseCase;
     private final ListCategoriesUseCase listCategoriesUseCase;
+    private final CheckStockAvailabilityUseCase checkStockAvailabilityUseCase;
     
     public AdminProductController(
             ListProductsUseCase listProductsUseCase,
@@ -33,7 +37,8 @@ public class AdminProductController {
             UpdateProductUseCase updateProductUseCase,
             DeactivateProductUseCase deactivateProductUseCase,
             ActivateProductUseCase activateProductUseCase,
-            ListCategoriesUseCase listCategoriesUseCase) {
+            ListCategoriesUseCase listCategoriesUseCase,
+            CheckStockAvailabilityUseCase checkStockAvailabilityUseCase) {
         this.listProductsUseCase = listProductsUseCase;
         this.getProductUseCase = getProductUseCase;
         this.createProductUseCase = createProductUseCase;
@@ -41,6 +46,7 @@ public class AdminProductController {
         this.deactivateProductUseCase = deactivateProductUseCase;
         this.activateProductUseCase = activateProductUseCase;
         this.listCategoriesUseCase = listCategoriesUseCase;
+        this.checkStockAvailabilityUseCase = checkStockAvailabilityUseCase;
     }
     
     @GetMapping
@@ -52,7 +58,15 @@ public class AdminProductController {
         ListProductsQuery query = ListProductsQuery.all(page, size);
         Page<ProductListView> products = listProductsUseCase.list(query);
         
+        java.util.Map<java.util.UUID, Integer> stockMap = new java.util.HashMap<>();
+        for (ProductListView product : products.getContent()) {
+            ProductAvailabilityView availability = checkStockAvailabilityUseCase.check(
+                new CheckStockAvailabilityQuery(product.id(), null));
+            stockMap.put(product.id(), availability.totalAvailable());
+        }
+        
         model.addAttribute("products", products);
+        model.addAttribute("stockMap", stockMap);
         return "admin/products/list";
     }
     

@@ -1,5 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
     displayName = "Catalog",
-    allowedDependencies = {"shared"}
+    allowedDependencies = {"shared", "inventory"}
 )
 package com.simpleshop.catalog;

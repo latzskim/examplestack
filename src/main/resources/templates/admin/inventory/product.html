@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/admin :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="'Stock: ' + ${product.name()}">Stock Management</title>
+</head>
+<body>
+<main>
+    <div class="container-fluid py-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/inventory}">Inventory</a></li>
+                <li class="breadcrumb-item active" th:text="${product.name()}">Product</li>
+            </ol>
+        </nav>
+        
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0" th:text="${product.name()}">Product Name</h5>
+                        <span class="text-muted" th:text="'SKU: ' + ${product.sku()}">SKU</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center mb-4">
+                            <div class="col-md-4">
+                                <h3 class="text-success" th:text="${totalAvailability.totalAvailable()}">0</h3>
+                                <p class="text-muted mb-0">Total Available</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h3 class="text-warning" th:text="${totalAvailability.totalReserved()}">0</h3>
+                                <p class="text-muted mb-0">Reserved</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h3 th:text="${totalAvailability.totalAvailable() + totalAvailability.totalReserved()}">0</h3>
+                                <p class="text-muted mb-0">Total Quantity</p>
+                            </div>
+                        </div>
+                        
+                        <h6>Stock by Warehouse</h6>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Warehouse</th>
+                                    <th>Quantity</th>
+                                    <th>Reserved</th>
+                                    <th>Available</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="stock : ${stocks}">
+                                    <td>
+                                        <span th:each="wh : ${warehouses}" th:if="${wh.id() == stock.warehouseId()}" th:text="${wh.name()}">Warehouse</span>
+                                    </td>
+                                    <td th:text="${stock.quantity()}">0</td>
+                                    <td th:text="${stock.reservedQuantity()}">0</td>
+                                    <td>
+                                        <strong th:text="${stock.availableQuantity()}">0</strong>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div th:if="${#lists.isEmpty(stocks)}" class="text-center py-3">
+                            <p class="text-muted mb-0">No stock entries yet. Add stock using the form.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Add/Replenish Stock</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(warehouses)}" class="alert alert-warning">
+                            <p class="mb-0">No warehouses available. <a th:href="@{/admin/warehouses/new}">Create a warehouse first</a>.</p>
+                        </div>
+                        
+                        <form th:unless="${#lists.isEmpty(warehouses)}" th:action="@{/admin/inventory/products/{id}/replenish(id=${product.id()})}" method="post">
+                            <div class="mb-3">
+                                <label for="warehouseId" class="form-label">Warehouse *</label>
+                                <select class="form-select" id="warehouseId" name="warehouseId" required>
+                                    <option value="">Select warehouse...</option>
+                                    <option th:each="wh : ${warehouses}" th:value="${wh.id()}" th:text="${wh.name()}">Warehouse</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label">Quantity to Add *</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" required min="1" value="1">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">Add Stock</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

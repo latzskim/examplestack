@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/admin :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Inventory Management</title>
+</head>
+<body>
+<main>
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Inventory</h1>
+            <a th:href="@{/admin/warehouses}" class="btn btn-outline-primary">Manage Warehouses</a>
+        </div>
+        
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Available Stock</th>
+                            <th>Reserved</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="info : ${productStocks}">
+                            <td th:text="${info.product().name()}">Product Name</td>
+                            <td th:text="${info.product().sku()}">SKU</td>
+                            <td>
+                                <span th:if="${info.available() == 0}" class="text-danger fw-bold">Out of Stock</span>
+                                <span th:if="${info.available() > 0 && info.available() <= 10}" class="text-warning fw-bold" th:text="${info.available()}">0</span>
+                                <span th:if="${info.available() > 10}" class="text-success" th:text="${info.available()}">0</span>
+                            </td>
+                            <td th:text="${info.reserved()}">0</td>
+                            <td>
+                                <a th:href="@{/admin/inventory/products/{id}(id=${info.product().id()})}" class="btn btn-sm btn-outline-primary">Manage Stock</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div th:if="${products.empty}" class="text-center py-4">
+                    <p class="text-muted">No products found. <a th:href="@{/admin/products/new}">Create a product first</a>.</p>
+                </div>
+                
+                <nav th:if="${products.totalPages > 1}" aria-label="Pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item" th:classappend="${products.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/inventory(page=${products.number - 1})}">Previous</a>
+                        </li>
+                        <li th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}" 
+                            class="page-item" th:classappend="${i == products.number} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/inventory(page=${i})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${products.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/inventory(page=${products.number + 1})}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

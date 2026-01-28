@@ -8,6 +8,9 @@ import com.simpleshop.catalog.application.query.ListCategoriesQuery;
 import com.simpleshop.catalog.application.query.ListProductsQuery;
 import com.simpleshop.catalog.application.query.ProductListView;
 import com.simpleshop.catalog.application.query.ProductView;
+import com.simpleshop.inventory.application.port.in.CheckStockAvailabilityUseCase;
+import com.simpleshop.inventory.application.query.CheckStockAvailabilityQuery;
+import com.simpleshop.inventory.application.query.ProductAvailabilityView;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,13 +27,16 @@ public class ProductController {
     private final ListProductsUseCase listProductsUseCase;
     private final GetProductUseCase getProductUseCase;
     private final ListCategoriesUseCase listCategoriesUseCase;
+    private final CheckStockAvailabilityUseCase checkStockAvailabilityUseCase;
     
     public ProductController(ListProductsUseCase listProductsUseCase, 
                             GetProductUseCase getProductUseCase,
-                            ListCategoriesUseCase listCategoriesUseCase) {
+                            ListCategoriesUseCase listCategoriesUseCase,
+                            CheckStockAvailabilityUseCase checkStockAvailabilityUseCase) {
         this.listProductsUseCase = listProductsUseCase;
         this.getProductUseCase = getProductUseCase;
         this.listCategoriesUseCase = listCategoriesUseCase;
+        this.checkStockAvailabilityUseCase = checkStockAvailabilityUseCase;
     }
     
     @GetMapping
@@ -59,7 +65,11 @@ public class ProductController {
             return "redirect:/products";
         }
         
+        ProductAvailabilityView availability = checkStockAvailabilityUseCase.check(
+            new CheckStockAvailabilityQuery(id, null));
+        
         model.addAttribute("product", product);
+        model.addAttribute("stockAvailable", availability.totalAvailable());
         return "products/detail";
     }
 }

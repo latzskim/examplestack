@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/admin :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${warehouse.name()}">Warehouse</title>
+</head>
+<body>
+<main>
+    <div class="container-fluid py-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/warehouses}">Warehouses</a></li>
+                <li class="breadcrumb-item active" th:text="${warehouse.name()}">Warehouse</li>
+            </ol>
+        </nav>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 th:text="${warehouse.name()}">Warehouse Name</h1>
+                <p class="text-muted mb-0" th:text="${warehouse.street() + ', ' + warehouse.city() + ' ' + warehouse.postalCode() + ', ' + warehouse.country()}">Address</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Stock in this Warehouse</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Quantity</th>
+                            <th>Reserved</th>
+                            <th>Available</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="stock : ${stocks.content}">
+                            <td>
+                                <a th:href="@{/admin/inventory/products/{id}(id=${stock.productId()})}" th:text="${stock.productId()}">Product ID</a>
+                            </td>
+                            <td th:text="${stock.quantity()}">0</td>
+                            <td th:text="${stock.reservedQuantity()}">0</td>
+                            <td>
+                                <strong th:text="${stock.availableQuantity()}">0</strong>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div th:if="${stocks.empty}" class="text-center py-4">
+                    <p class="text-muted">No stock in this warehouse yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

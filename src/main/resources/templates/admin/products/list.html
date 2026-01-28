@@ -22,6 +22,7 @@
                             <th>Name</th>
                             <th>SKU</th>
                             <th>Price</th>
+                            <th>Stock</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -37,6 +38,13 @@
                             <td th:text="${product.name()}">Product Name</td>
                             <td th:text="${product.sku()}">SKU123</td>
                             <td th:text="${#numbers.formatDecimal(product.price(), 1, 2)} + ' ' + ${product.currency()}">$0.00</td>
+                            <td>
+                                <span th:with="stock=${stockMap.get(product.id())}">
+                                    <span th:if="${stock == 0}" class="text-danger fw-bold">0</span>
+                                    <span th:if="${stock > 0 && stock <= 10}" class="text-warning fw-bold" th:text="${stock}">0</span>
+                                    <span th:if="${stock > 10}" class="text-success" th:text="${stock}">0</span>
+                                </span>
+                            </td>
                             <td>
                                 <span th:if="${product.active()}" class="badge bg-success">Active</span>
                                 <span th:unless="${product.active()}" class="badge bg-secondary">Inactive</span>
