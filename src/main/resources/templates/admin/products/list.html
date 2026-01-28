@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/admin :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Manage Products</title>
+</head>
+<body>
+<main>
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Products</h1>
+            <a th:href="@{/admin/products/new}" class="btn btn-primary">Add Product</a>
+        </div>
+        
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>SKU</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="product : ${products.content}">
+                            <td style="width: 80px;">
+                                <img th:if="${product.imageUrl() != null}" th:src="${product.imageUrl()}" style="width: 60px; height: 60px; object-fit: cover;" class="rounded">
+                                <div th:if="${product.imageUrl() == null}" class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <small class="text-muted">-</small>
+                                </div>
+                            </td>
+                            <td th:text="${product.name()}">Product Name</td>
+                            <td th:text="${product.sku()}">SKU123</td>
+                            <td th:text="${#numbers.formatDecimal(product.price(), 1, 2)} + ' ' + ${product.currency()}">$0.00</td>
+                            <td>
+                                <span th:if="${product.active()}" class="badge bg-success">Active</span>
+                                <span th:unless="${product.active()}" class="badge bg-secondary">Inactive</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/admin/products/{id}/edit(id=${product.id()})}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <form th:if="${product.active()}" th:action="@{/admin/products/{id}/deactivate(id=${product.id()})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-warning">Deactivate</button>
+                                </form>
+                                <form th:unless="${product.active()}" th:action="@{/admin/products/{id}/activate(id=${product.id()})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-success">Activate</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div th:if="${products.empty}" class="text-center py-4">
+                    <p class="text-muted">No products found. <a th:href="@{/admin/products/new}">Create one</a>.</p>
+                </div>
+                
+                <nav th:if="${products.totalPages > 1}" aria-label="Product pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item" th:classappend="${products.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/products(page=${products.number - 1})}">Previous</a>
+                        </li>
+                        <li th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}" 
+                            class="page-item" th:classappend="${i == products.number} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/products(page=${i})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${products.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/products(page=${products.number + 1})}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

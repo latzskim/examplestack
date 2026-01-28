@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/main :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Products</title>
+</head>
+<body>
+<main>
+    <div class="container py-4">
+        <h1 class="mb-4">Products</h1>
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card mb-4">
+                    <div class="card-header">Categories</div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <a th:href="@{/products}" th:classappend="${selectedCategoryId == null} ? 'fw-bold' : ''">All Products</a>
+                        </li>
+                        <li th:each="category : ${categories}" class="list-group-item">
+                            <a th:href="@{/products(categoryId=${category.id()})}" 
+                               th:text="${category.name()}"
+                               th:classappend="${selectedCategoryId != null && selectedCategoryId.equals(category.id())} ? 'fw-bold' : ''">Category</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-md-9">
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    <div th:each="product : ${products.content}" class="col">
+                        <div class="card h-100">
+                            <img th:if="${product.imageUrl() != null}" th:src="${product.imageUrl()}" class="card-img-top" alt="Product image" style="height: 200px; object-fit: cover;">
+                            <div th:if="${product.imageUrl() == null}" class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <span class="text-muted">No image</span>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${product.name()}">Product Name</h5>
+                                <p class="card-text">
+                                    <strong th:text="${#numbers.formatDecimal(product.price(), 1, 2)} + ' ' + ${product.currency()}">$0.00 USD</strong>
+                                </p>
+                                <a th:href="@{/products/{id}(id=${product.id()})}" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div th:if="${products.totalPages > 1}" class="mt-4">
+                    <nav aria-label="Product pagination">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${products.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{/products(page=${products.number - 1}, categoryId=${selectedCategoryId})}">Previous</a>
+                            </li>
+                            <li th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}" 
+                                class="page-item" th:classappend="${i == products.number} ? 'active'">
+                                <a class="page-link" th:href="@{/products(page=${i}, categoryId=${selectedCategoryId})}" th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${products.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{/products(page=${products.number + 1}, categoryId=${selectedCategoryId})}">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                
+                <div th:if="${products.empty}" class="text-center py-5">
+                    <p class="text-muted">No products found.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
