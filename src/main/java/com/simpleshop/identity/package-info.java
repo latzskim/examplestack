@@ -1,5 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
     displayName = "Identity",
-    allowedDependencies = {"shared"}
+    allowedDependencies = {"shared", "cart"}
 )
 package com.simpleshop.identity;
