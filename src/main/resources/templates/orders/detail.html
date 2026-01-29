@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/main :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Order Details</title>
+</head>
+<body>
+<main>
+    <div class="container py-4">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/orders}">My Orders</a></li>
+                <li class="breadcrumb-item active" th:text="${order.orderNumber}">ORD-2024-00001</li>
+            </ol>
+        </nav>
+        
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 th:text="'Order ' + ${order.orderNumber}">Order ORD-2024-00001</h1>
+            <span class="badge fs-6"
+                  th:classappend="${order.status == 'DELIVERED' ? 'bg-success' : 
+                                   (order.status == 'CANCELLED' ? 'bg-danger' : 
+                                   (order.status == 'SHIPPED' ? 'bg-info' : 'bg-warning'))}"
+                  th:text="${order.status}">PENDING</span>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Order Items</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-borderless mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item : ${order.items}">
+                                    <td th:text="${item.productName}">Product Name</td>
+                                    <td class="text-center" th:text="${item.quantity}">1</td>
+                                    <td class="text-end" th:text="${#numbers.formatDecimal(item.unitPrice, 1, 2)} + ' ' + ${item.currency}">0.00 USD</td>
+                                    <td class="text-end" th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)} + ' ' + ${item.currency}">0.00 USD</td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="3" class="text-end fw-bold">Total:</td>
+                                    <td class="text-end fw-bold fs-5" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' ' + ${order.currency}">0.00 USD</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="card" th:if="${order.status == 'PENDING' or order.status == 'CONFIRMED' or order.status == 'PROCESSING'}">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-3">Order Actions</h6>
+                        <form th:action="@{/orders/{id}/cancel(id=${order.id})}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger" 
+                                    onclick="return confirm('Are you sure you want to cancel this order?')">
+                                Cancel Order
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Order Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-5 text-muted">Order Date:</dt>
+                            <dd class="col-sm-7" th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</dd>
+                            
+                            <dt class="col-sm-5 text-muted" th:if="${order.paidAt}">Paid At:</dt>
+                            <dd class="col-sm-7" th:if="${order.paidAt}" th:text="${#temporals.format(order.paidAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</dd>
+                            
+                            <dt class="col-sm-5 text-muted" th:if="${order.shippedAt}">Shipped At:</dt>
+                            <dd class="col-sm-7" th:if="${order.shippedAt}" th:text="${#temporals.format(order.shippedAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</dd>
+                            
+                            <dt class="col-sm-5 text-muted" th:if="${order.deliveredAt}">Delivered At:</dt>
+                            <dd class="col-sm-7" th:if="${order.deliveredAt}" th:text="${#temporals.format(order.deliveredAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</dd>
+                            
+                            <dt class="col-sm-5 text-muted" th:if="${order.cancelledAt}">Cancelled At:</dt>
+                            <dd class="col-sm-7" th:if="${order.cancelledAt}" th:text="${#temporals.format(order.cancelledAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</dd>
+                            
+                            <dt class="col-sm-5 text-muted" th:if="${order.cancellationReason}">Reason:</dt>
+                            <dd class="col-sm-7" th:if="${order.cancellationReason}" th:text="${order.cancellationReason}">Cancelled</dd>
+                        </dl>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Shipping Address</h5>
+                    </div>
+                    <div class="card-body">
+                        <address class="mb-0">
+                            <span th:text="${order.shippingStreet}">Street</span><br>
+                            <span th:text="${order.shippingCity} + ', ' + ${order.shippingPostalCode}">City, Postal</span><br>
+                            <span th:text="${order.shippingCountry}">Country</span>
+                        </address>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <a th:href="@{/orders}" class="btn btn-outline-secondary">Back to Orders</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

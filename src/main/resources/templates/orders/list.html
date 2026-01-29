@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/main :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>My Orders</title>
+</head>
+<body>
+<main>
+    <div class="container py-4">
+        <h1 class="mb-4">My Orders</h1>
+        
+        <div th:if="${orders.empty}" class="text-center py-5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="text-muted mb-3" viewBox="0 0 16 16">
+                <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
+                <path d="M5 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 5 8zm0-2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5z"/>
+            </svg>
+            <p class="text-muted fs-5">You haven't placed any orders yet.</p>
+            <a th:href="@{/products}" class="btn btn-primary mt-3">Start Shopping</a>
+        </div>
+        
+        <div th:if="${!orders.empty}">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Order Number</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orders.content}">
+                            <td>
+                                <a th:href="@{/orders/{id}(id=${order.id})}" th:text="${order.orderNumber}" class="text-decoration-none fw-bold">ORD-2024-00001</a>
+                            </td>
+                            <td th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</td>
+                            <td th:text="${order.itemCount} + ' item(s)'">1 item(s)</td>
+                            <td th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' ' + ${order.currency}">0.00 USD</td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${order.status == 'DELIVERED' ? 'bg-success' : 
+                                                       (order.status == 'CANCELLED' ? 'bg-danger' : 
+                                                       (order.status == 'SHIPPED' ? 'bg-info' : 'bg-warning'))}"
+                                      th:text="${order.status}">PENDING</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <nav th:if="${orders.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${orders.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/orders(page=${orders.number - 1})}">Previous</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}"
+                        th:classappend="${i == orders.number ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/orders(page=${i})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${orders.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/orders(page=${orders.number + 1})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</main>
+</body>
+</html>

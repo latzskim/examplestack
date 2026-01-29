@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/main :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Checkout</title>
+</head>
+<body>
+<main>
+    <div class="container py-4">
+        <h1 class="mb-4">Checkout</h1>
+        
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Shipping Address</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/checkout}" method="post" th:object="${checkoutForm}">
+                            <div class="mb-3">
+                                <label for="street" class="form-label">Street Address</label>
+                                <input type="text" class="form-control" id="street" th:field="*{street}" required>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="city" class="form-label">City</label>
+                                    <input type="text" class="form-control" id="city" th:field="*{city}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="postalCode" class="form-label">Postal Code</label>
+                                    <input type="text" class="form-control" id="postalCode" th:field="*{postalCode}" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="country" class="form-label">Country</label>
+                                <input type="text" class="form-control" id="country" th:field="*{country}" required>
+                            </div>
+                            <input type="hidden" th:field="*{warehouseId}" value="00000000-0000-0000-0000-000000000001">
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <a th:href="@{/cart}" class="btn btn-outline-secondary">Back to Cart</a>
+                                <button type="submit" class="btn btn-primary btn-lg">Place Order</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between" th:each="item : ${cart.items}">
+                                <div>
+                                    <span th:text="${item.productName}">Product</span>
+                                    <small class="text-muted d-block" th:text="'Qty: ' + ${item.quantity}">Qty: 1</small>
+                                </div>
+                                <span th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)} + ' ' + ${item.currency}">0.00 USD</span>
+                            </li>
+                        </ul>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold">
+                            <span>Total:</span>
+                            <span th:text="${#numbers.formatDecimal(cart.total, 1, 2)} + ' ' + ${cart.currency}">0.00 USD</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

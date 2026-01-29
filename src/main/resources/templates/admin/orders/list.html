@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/admin :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Order Management</title>
+</head>
+<body>
+<main>
+    <div class="container-fluid py-4">
+        <h1 class="mb-4">Order Management</h1>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Order Number</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${orders.content}">
+                        <td>
+                            <a th:href="@{/admin/orders/{id}(id=${order.id})}" th:text="${order.orderNumber.value}" class="fw-bold text-decoration-none">ORD-2024-00001</a>
+                        </td>
+                        <td th:text="${order.userId}">User ID</td>
+                        <td th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</td>
+                        <td th:text="${order.totalAmount}">0.00 USD</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${order.status.name() == 'DELIVERED' ? 'bg-success' : 
+                                                   (order.status.name() == 'CANCELLED' ? 'bg-danger' : 
+                                                   (order.status.name() == 'SHIPPED' ? 'bg-info' : 
+                                                   (order.status.name() == 'PROCESSING' ? 'bg-primary' :
+                                                   (order.status.name() == 'CONFIRMED' ? 'bg-secondary' : 'bg-warning'))))}"
+                                  th:text="${order.status}">PENDING</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="btn btn-sm btn-outline-primary">Manage</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <nav th:if="${orders.totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${orders.first ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/admin/orders(page=${orders.number - 1})}">Previous</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}"
+                    th:classappend="${i == orders.number ? 'active' : ''}">
+                    <a class="page-link" th:href="@{/admin/orders(page=${i})}" th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${orders.last ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/admin/orders(page=${orders.number + 1})}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</main>
+</body>
+</html>
