@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Simple Shop!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+        .welcome-message {
+            background-color: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .feature {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .social-links {
+            margin: 20px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Welcome! 🎉</h1>
+        <p>We're thrilled to have you join us</p>
+    </div>
+    
+    <div class="content">
+        <div class="welcome-message">
+            <h2>Hi <span th:text="${firstName != null && !firstName.isEmpty() ? firstName : 'there'}">there</span>!</h2>
+            <p>Welcome to <strong>Simple Shop</strong> - your new favorite destination for amazing products!</p>
+            <p style="font-size: 1.1em; color: #666;">
+                Your account has been successfully created with email: <br>
+                <strong th:text="${recipientEmail}">user@example.com</strong>
+            </p>
+        </div>
+        
+        <h3 style="text-align: center; color: #667eea;">What You Can Do</h3>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🛍️</div>
+                <strong>Browse Products</strong>
+                <p style="font-size: 0.9em; color: #666;">Discover amazing products</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🛒</div>
+                <strong>Easy Checkout</strong>
+                <p style="font-size: 0.9em; color: #666;">Fast and secure shopping</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📦</div>
+                <strong>Track Orders</strong>
+                <p style="font-size: 0.9em; color: #666;">Real-time shipping updates</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💝</div>
+                <strong>Save Favorites</strong>
+                <p style="font-size: 0.9em; color: #666;">Create your wishlist</p>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a th:href="${baseUrl != null ? baseUrl + '/products' : '#'}" class="button">Start Shopping</a>
+        </div>
+        
+        <div style="background-color: #FFF9C4; padding: 20px; border-radius: 5px; margin: 20px 0; text-align: center;">
+            <strong>💡 Tip:</strong> Keep an eye on your inbox for exclusive deals and new arrivals!
+        </div>
+        
+        <div class="footer">
+            <p>Thanks for joining us!</p>
+            <div class="social-links">
+                <a href="#">Facebook</a> •
+                <a href="#">Twitter</a> •
+                <a href="#">Instagram</a>
+            </div>
+            <p style="font-size: 0.8em; color: #999;">
+                Questions? Contact us at <a href="mailto:support@simpleshop.com" style="color: #667eea;">support@simpleshop.com</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

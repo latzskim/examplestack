@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Order Has Shipped!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.2em;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+        .greeting {
+            margin-bottom: 20px;
+        }
+        .highlight-box {
+            background-color: #FFF9C4;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #FBC02D;
+        }
+        
+        /* Timeline Styles */
+        .timeline {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .timeline h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .timeline-container {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #ddd;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ddd;
+            border: 2px solid white;
+        }
+        .timeline-item.completed::before {
+            background-color: #4CAF50;
+        }
+        .timeline-item.current::before {
+            background-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+        .timeline-item.pending::before {
+            background-color: #ddd;
+        }
+        .timeline-status {
+            font-weight: bold;
+            color: #333;
+        }
+        .timeline-item.completed .timeline-status {
+            color: #4CAF50;
+        }
+        .timeline-item.current .timeline-status {
+            color: #667eea;
+        }
+        .timeline-item.pending .timeline-status {
+            color: #999;
+        }
+        
+        .tracking-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .tracking-label {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .tracking-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            font-family: monospace;
+            letter-spacing: 2px;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 5px;
+        }
+        .button {
+            display: inline-block;
+            background-color: white;
+            color: #667eea;
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .details {
+            background-color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .details h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .address-box {
+            background-color: #f2f2f2;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚚 It's on the way!</h1>
+        <p>Your order has been shipped</p>
+    </div>
+    
+    <div class="content">
+        <div class="greeting">
+            <p>Hi <strong th:text="${firstName != null && !firstName.isEmpty() ? firstName : 'there'}">there</strong>,</p>
+        </div>
+        
+        <div class="highlight-box">
+            <strong>Great news!</strong> Your order has been packed and shipped. It's now on its way to you!
+        </div>
+        
+        <!-- Shipment Timeline -->
+        <div class="timeline">
+            <h3>📦 Shipment Progress</h3>
+            <div class="timeline-container">
+                <div class="timeline-item completed">
+                    <div class="timeline-status">Order Placed</div>
+                    <div style="font-size: 0.9em; color: #666;">Your order has been received</div>
+                </div>
+                <div class="timeline-item completed">
+                    <div class="timeline-status">Picked</div>
+                    <div style="font-size: 0.9em; color: #666;">Items picked from warehouse</div>
+                </div>
+                <div class="timeline-item completed">
+                    <div class="timeline-status">Packed</div>
+                    <div style="font-size: 0.9em; color: #666;">Items packed and ready</div>
+                </div>
+                <div class="timeline-item current">
+                    <div class="timeline-status">Shipped</div>
+                    <div style="font-size: 0.9em; color: #666;">Handed to carrier and on the way!</div>
+                </div>
+                <div class="timeline-item pending">
+                    <div class="timeline-status">In Transit</div>
+                    <div style="font-size: 0.9em; color: #666;">On the way to destination</div>
+                </div>
+                <div class="timeline-item pending">
+                    <div class="timeline-status">Out For Delivery</div>
+                    <div style="font-size: 0.9em; color: #666;">Arriving today</div>
+                </div>
+                <div class="timeline-item pending">
+                    <div class="timeline-status">Delivered</div>
+                    <div style="font-size: 0.9em; color: #666;">Package delivered</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tracking-box">
+            <div class="tracking-label">Your Tracking Number</div>
+            <div class="tracking-number" th:text="${shipment.trackingNumber}">SHIP-2024-00001</div>
+            <a th:href="${baseUrl != null ? baseUrl + '/shipments/track?trackingNumber=' + shipment.trackingNumber : '#'}" 
+               class="button">Track My Package</a>
+        </div>
+        
+        <div class="details">
+            <h3>What's Next?</h3>
+            <ul>
+                <li>Your package status: <strong th:text="${currentStatus}">Shipped</strong></li>
+                <li>Expected delivery: <strong th:text="${shipment.estimatedDelivery}">January 15, 2024</strong></li>
+                <li>You'll receive email updates at each milestone</li>
+                <li>You can track your package anytime using the link above</li>
+            </ul>
+        </div>
+        
+        <div class="address-box">
+            <h3>Delivery Address</h3>
+            <p th:text="${shipment.destinationStreet}">123 Main St</p>
+            <p><span th:text="${shipment.destinationCity}">New York</span>, <span th:text="${shipment.destinationPostalCode}">10001</span></p>
+            <p th:text="${shipment.destinationCountry}">USA</p>
+        </div>
+        
+        <div class="footer">
+            <p>Thanks for shopping with Simple Shop!</p>
+            <p style="font-size: 0.8em; color: #999;">
+                Track your shipment anytime at <a th:href="${baseUrl}" style="color: #667eea;">simpleshop.com</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

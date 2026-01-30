@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipment Update</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #2196F3;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+        .greeting {
+            margin-bottom: 20px;
+        }
+        .shipment-box {
+            background-color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+        .status-CREATED { background-color: #E0E0E0; color: #333; }
+        .status-PICKED { background-color: #BBDEFB; color: #1565C0; }
+        .status-PACKED { background-color: #C8E6C9; color: #2E7D32; }
+        .status-SHIPPED { background-color: #81C784; color: white; }
+        .status-IN_TRANSIT { background-color: #64B5F6; color: white; }
+        .status-OUT_FOR_DELIVERY { background-color: #FFB74D; color: white; }
+        .status-DELIVERED { background-color: #4CAF50; color: white; }
+        .status-FAILED { background-color: #EF5350; color: white; }
+        
+        .tracking-box {
+            background-color: #E3F2FD;
+            border: 2px solid #2196F3;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .tracking-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            font-family: monospace;
+            letter-spacing: 1px;
+            margin: 10px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #2196F3;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        /* Timeline Styles */
+        .timeline {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+        }
+        .timeline h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .timeline-container {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #ddd;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ddd;
+            border: 2px solid white;
+        }
+        .timeline-item.completed::before {
+            background-color: #4CAF50;
+        }
+        .timeline-item.current::before {
+            background-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
+        }
+        .timeline-item.pending::before {
+            background-color: #ddd;
+        }
+        .timeline-status {
+            font-weight: bold;
+            color: #333;
+        }
+        .timeline-item.completed .timeline-status {
+            color: #4CAF50;
+        }
+        .timeline-item.current .timeline-status {
+            color: #2196F3;
+        }
+        .timeline-item.pending .timeline-status {
+            color: #999;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .address-box {
+            background-color: #f2f2f2;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .info-item {
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .info-value {
+            color: #333;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Shipment Update</h1>
+        <p>Your order is on the move!</p>
+    </div>
+    
+    <div class="content">
+        <div class="greeting">
+            <p>Hi <strong th:text="${firstName != null && !firstName.isEmpty() ? firstName : 'there'}">there</strong>,</p>
+            <p>There has been an update to your shipment.</p>
+        </div>
+        
+        <div class="shipment-box">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span class="status-badge" th:classappend="'status-' + ${currentStatus != null ? currentStatus.toUpperCase().replace(' ', '_') : 'CREATED'}" 
+                      th:text="${currentStatus}">In Transit</span>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Tracking Number</div>
+                    <div class="info-value" style="font-family: monospace; font-weight: bold;" th:text="${shipment.trackingNumber}">SHIP-2024-00001</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Estimated Delivery</div>
+                    <div class="info-value" th:text="${shipment.estimatedDelivery}">2024-01-15</div>
+                </div>
+            </div>
+            
+            <div th:if="${location != null && !location.isEmpty()}" style="margin-top: 15px; padding: 10px; background-color: #E8F5E9; border-radius: 5px;">
+                <strong>📍 Current Location:</strong> <span th:text="${location}">Distribution Center</span>
+            </div>
+            
+            <div th:if="${notes != null && !notes.isEmpty()}" style="margin-top: 10px; font-style: italic; color: #666;">
+                <span th:text="${notes}">Your package is being processed</span>
+            </div>
+        </div>
+        
+        <!-- Shipment Timeline -->
+        <div class="timeline">
+            <h3>📦 Shipment Timeline</h3>
+            <div class="timeline-container">
+                <div class="timeline-item completed">
+                    <div class="timeline-status">Order Placed</div>
+                    <div style="font-size: 0.9em; color: #666;">Your order has been received</div>
+                </div>
+                <div class="timeline-item" th:classappend="${currentStatus == 'Picked' || currentStatus == 'Packed' || currentStatus == 'Shipped' || currentStatus == 'In Transit' || currentStatus == 'Out For Delivery' || currentStatus == 'Delivered'} ? 'completed' : (${currentStatus == 'Created'} ? 'current' : 'pending')">
+                    <div class="timeline-status">Picked</div>
+                    <div style="font-size: 0.9em; color: #666;">Items picked from warehouse</div>
+                </div>
+                <div class="timeline-item" th:classappend="${currentStatus == 'Packed' || currentStatus == 'Shipped' || currentStatus == 'In Transit' || currentStatus == 'Out For Delivery' || currentStatus == 'Delivered'} ? 'completed' : (${currentStatus == 'Picked'} ? 'current' : 'pending')">
+                    <div class="timeline-status">Packed</div>
+                    <div style="font-size: 0.9em; color: #666;">Items packed and ready</div>
+                </div>
+                <div class="timeline-item" th:classappend="${currentStatus == 'Shipped' || currentStatus == 'In Transit' || currentStatus == 'Out For Delivery' || currentStatus == 'Delivered'} ? 'completed' : (${currentStatus == 'Packed'} ? 'current' : 'pending')">
+                    <div class="timeline-status">Shipped</div>
+                    <div style="font-size: 0.9em; color: #666;">Handed to carrier</div>
+                </div>
+                <div class="timeline-item" th:classappend="${currentStatus == 'In Transit' || currentStatus == 'Out For Delivery' || currentStatus == 'Delivered'} ? 'completed' : (${currentStatus == 'Shipped'} ? 'current' : 'pending')">
+                    <div class="timeline-status">In Transit</div>
+                    <div style="font-size: 0.9em; color: #666;">On the way to destination</div>
+                </div>
+                <div class="timeline-item" th:classappend="${currentStatus == 'Out For Delivery' || currentStatus == 'Delivered'} ? 'completed' : (${currentStatus == 'In Transit'} ? 'current' : 'pending')">
+                    <div class="timeline-status">Out For Delivery</div>
+                    <div style="font-size: 0.9em; color: #666;">Arriving today</div>
+                </div>
+                <div class="timeline-item" th:classappend="${currentStatus == 'Delivered'} ? 'completed' : (${currentStatus == 'Out For Delivery'} ? 'current' : 'pending')">
+                    <div class="timeline-status">Delivered</div>
+                    <div style="font-size: 0.9em; color: #666;">Package delivered</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tracking-box">
+            <p style="margin: 0; color: #1565C0; font-weight: bold;">TRACK YOUR PACKAGE</p>
+            <div class="tracking-number" th:text="${shipment.trackingNumber}">SHIP-2024-00001</div>
+            <a th:href="${baseUrl != null ? baseUrl + '/shipments/track?trackingNumber=' + shipment.trackingNumber : '#'}" 
+               class="button" style="color: white;">Track Shipment</a>
+        </div>
+        
+        <div class="address-box">
+            <h3 style="margin-top: 0;">Shipping To</h3>
+            <p th:text="${shipment.destinationStreet}">123 Main St</p>
+            <p><span th:text="${shipment.destinationCity}">New York</span>, <span th:text="${shipment.destinationPostalCode}">10001</span></p>
+            <p th:text="${shipment.destinationCountry}">USA</p>
+        </div>
+        
+        <div class="footer">
+            <p>We'll keep you updated on your shipment status.</p>
+            <p>Questions? Contact us at <a href="mailto:support@simpleshop.com">support@simpleshop.com</a></p>
+        </div>
+    </div>
+</body>
+</html>

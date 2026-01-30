@@ -271,7 +271,7 @@ public class ShipmentTest {
         Shipment shipment = Shipment.create(trackingNumber, orderId, warehouseId, destinationAddress, estimatedDelivery);
 
         assertThrows(UnsupportedOperationException.class, () -> {
-            shipment.getStatusHistory().add(new ShipmentStatusChange(shipment.getId(), ShipmentStatus.FAILED, null, null));
+            shipment.getStatusHistory().add(new ShipmentStatusChange(shipment, ShipmentStatus.FAILED, null, null));
         });
     }
 }

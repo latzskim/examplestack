@@ -40,6 +40,9 @@ spring:
   modulith:
     events:
       republish-outstanding-events-on-restart: true
+      jdbc:
+        schema-initialization:
+          enabled: true
 
 management:
   tracing:

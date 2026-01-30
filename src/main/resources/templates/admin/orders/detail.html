@@ -123,7 +123,6 @@
                                         <select name="newStatus" class="form-select form-select-sm" required>
                                             <option value="">Select...</option>
                                             <option th:each="status : ${shipmentStatuses}"
-                                                    th:if="${shipment.status.canTransitionTo(status)}"
                                                     th:value="${status}"
                                                     th:text="${status.displayName}"
                                                     th:selected="${status == shipment.status}">Status</option>
