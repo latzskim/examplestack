@@ -3,6 +3,7 @@ package com.simpleshop.order.domain.model;
 import com.simpleshop.order.domain.event.*;
 import com.simpleshop.order.domain.exception.EmptyOrderException;
 import com.simpleshop.order.domain.exception.InvalidOrderStateException;
+import com.simpleshop.order.domain.model.vo.OrderNumber;
 import com.simpleshop.order.domain.model.vo.OrderStatus;
 import com.simpleshop.shared.domain.model.vo.Address;
 import com.simpleshop.shared.domain.model.vo.Money;
@@ -12,11 +13,14 @@ import org.testng.annotations.Test;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.testng.Assert.*;
 
 public class OrderTest {
 
+    private static final AtomicInteger ORDER_COUNTER = new AtomicInteger(0);
+    
     private UUID userId;
     private Address shippingAddress;
     private List<OrderItem> orderItems;
@@ -46,10 +50,14 @@ public class OrderTest {
         
         orderItems = List.of(item1, item2);
     }
+    
+    private OrderNumber generateTestOrderNumber() {
+        return OrderNumber.of(String.format("ORD-2025-%05d", ORDER_COUNTER.incrementAndGet()));
+    }
 
     @Test
     public void place_createsOrderWithCorrectState() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
 
         assertNotNull(order.getId());
         assertNotNull(order.getOrderNumber());
@@ -63,7 +71,7 @@ public class OrderTest {
 
     @Test
     public void place_calculatesTotalCorrectly() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
 
         Money expectedTotal = Money.usd(new BigDecimal("100.00"));
         assertEquals(order.getTotalAmount(), expectedTotal);
@@ -71,7 +79,7 @@ public class OrderTest {
 
     @Test
     public void place_registersOrderPlacedEvent() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
 
         var events = order.getDomainEvents();
         assertEquals(events.size(), 1);
@@ -85,28 +93,33 @@ public class OrderTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
+    public void place_throwsForNullOrderNumber() {
+        Order.place(null, userId, shippingAddress, orderItems);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void place_throwsForNullUserId() {
-        Order.place(null, shippingAddress, orderItems);
+        Order.place(generateTestOrderNumber(), null, shippingAddress, orderItems);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void place_throwsForNullAddress() {
-        Order.place(userId, null, orderItems);
+        Order.place(generateTestOrderNumber(), userId, null, orderItems);
     }
 
     @Test(expectedExceptions = EmptyOrderException.class)
     public void place_throwsForEmptyItems() {
-        Order.place(userId, shippingAddress, List.of());
+        Order.place(generateTestOrderNumber(), userId, shippingAddress, List.of());
     }
 
     @Test(expectedExceptions = EmptyOrderException.class)
     public void place_throwsForNullItems() {
-        Order.place(userId, shippingAddress, null);
+        Order.place(generateTestOrderNumber(), userId, shippingAddress, null);
     }
 
     @Test
     public void confirm_changesStatusToConfirmed() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.clearEvents();
 
         order.confirm();
@@ -117,7 +130,7 @@ public class OrderTest {
 
     @Test
     public void confirm_registersOrderConfirmedEvent() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.clearEvents();
 
         order.confirm();
@@ -133,7 +146,7 @@ public class OrderTest {
 
     @Test
     public void startProcessing_changesStatusToProcessing() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.confirm();
 
         order.startProcessing();
@@ -143,14 +156,14 @@ public class OrderTest {
 
     @Test(expectedExceptions = InvalidOrderStateException.class)
     public void startProcessing_throwsFromPendingStatus() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
 
         order.startProcessing();
     }
 
     @Test
     public void ship_changesStatusToShipped() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.confirm();
         order.startProcessing();
         order.clearEvents();
@@ -163,7 +176,7 @@ public class OrderTest {
 
     @Test
     public void ship_registersOrderShippedEvent() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.confirm();
         order.startProcessing();
         order.clearEvents();
@@ -177,14 +190,14 @@ public class OrderTest {
 
     @Test(expectedExceptions = InvalidOrderStateException.class)
     public void ship_throwsFromPendingStatus() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
 
         order.ship();
     }
 
     @Test
     public void deliver_changesStatusToDelivered() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.confirm();
         order.startProcessing();
         order.ship();
@@ -198,7 +211,7 @@ public class OrderTest {
 
     @Test
     public void deliver_registersOrderDeliveredEvent() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.confirm();
         order.startProcessing();
         order.ship();
@@ -213,7 +226,7 @@ public class OrderTest {
 
     @Test(expectedExceptions = InvalidOrderStateException.class)
     public void deliver_throwsFromProcessingStatus() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.confirm();
         order.startProcessing();
 
@@ -222,7 +235,7 @@ public class OrderTest {
 
     @Test
     public void cancel_changesStatusToCancelled() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.clearEvents();
 
         order.cancel("Customer request");
@@ -234,7 +247,7 @@ public class OrderTest {
 
     @Test
     public void cancel_registersOrderCancelledEvent() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.clearEvents();
 
         order.cancel("Out of stock");
@@ -248,30 +261,26 @@ public class OrderTest {
         assertEquals(event.getReason(), "Out of stock");
     }
 
-    @Test
-    public void cancel_canCancelFromConfirmedStatus() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+    @Test(expectedExceptions = InvalidOrderStateException.class)
+    public void cancel_throwsFromConfirmedStatus() {
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.confirm();
 
         order.cancel("Changed mind");
-
-        assertEquals(order.getStatus(), OrderStatus.CANCELLED);
     }
 
-    @Test
-    public void cancel_canCancelFromProcessingStatus() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+    @Test(expectedExceptions = InvalidOrderStateException.class)
+    public void cancel_throwsFromProcessingStatus() {
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.confirm();
         order.startProcessing();
 
         order.cancel("Issue found");
-
-        assertEquals(order.getStatus(), OrderStatus.CANCELLED);
     }
 
     @Test(expectedExceptions = InvalidOrderStateException.class)
     public void cancel_throwsFromShippedStatus() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.confirm();
         order.startProcessing();
         order.ship();
@@ -281,7 +290,7 @@ public class OrderTest {
 
     @Test(expectedExceptions = InvalidOrderStateException.class)
     public void cancel_throwsFromDeliveredStatus() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.confirm();
         order.startProcessing();
         order.ship();
@@ -292,7 +301,7 @@ public class OrderTest {
 
     @Test(expectedExceptions = InvalidOrderStateException.class)
     public void confirm_throwsFromCancelledStatus() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.cancel("Cancelled");
 
         order.confirm();
@@ -300,14 +309,14 @@ public class OrderTest {
 
     @Test
     public void getItemCount_returnsTotalQuantity() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
 
         assertEquals(order.getItemCount(), 3);
     }
 
     @Test
     public void isPending_returnsTrueForPendingOrder() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
 
         assertTrue(order.isPending());
         assertFalse(order.isConfirmed());
@@ -317,7 +326,7 @@ public class OrderTest {
 
     @Test
     public void isConfirmed_returnsTrueForConfirmedOrder() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.confirm();
 
         assertFalse(order.isPending());
@@ -326,7 +335,7 @@ public class OrderTest {
 
     @Test
     public void isCancelled_returnsTrueForCancelledOrder() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.cancel("Test");
 
         assertTrue(order.isCancelled());
@@ -334,7 +343,7 @@ public class OrderTest {
 
     @Test
     public void isDelivered_returnsTrueForDeliveredOrder() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
         order.confirm();
         order.startProcessing();
         order.ship();
@@ -345,7 +354,7 @@ public class OrderTest {
 
     @Test
     public void getItems_returnsUnmodifiableList() {
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        Order order = Order.place(generateTestOrderNumber(), userId, shippingAddress, orderItems);
 
         assertThrows(UnsupportedOperationException.class, () -> {
             order.getItems().add(item1);

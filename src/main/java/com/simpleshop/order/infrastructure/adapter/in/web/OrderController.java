@@ -74,8 +74,7 @@ public class OrderController {
                 form.getStreet(),
                 form.getCity(),
                 form.getPostalCode(),
-                form.getCountry(),
-                form.getWarehouseId()
+                form.getCountry()
             );
             
             OrderView order = placeOrderFromCartUseCase.execute(command);
@@ -154,7 +153,6 @@ public class OrderController {
         private String city;
         private String postalCode;
         private String country;
-        private UUID warehouseId;
         
         public String getStreet() { return street; }
         public void setStreet(String street) { this.street = street; }
@@ -164,7 +162,5 @@ public class OrderController {
         public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
         public String getCountry() { return country; }
         public void setCountry(String country) { this.country = country; }
-        public UUID getWarehouseId() { return warehouseId; }
-        public void setWarehouseId(UUID warehouseId) { this.warehouseId = warehouseId; }
     }
 }

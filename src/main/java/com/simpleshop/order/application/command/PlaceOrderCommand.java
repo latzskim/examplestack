@@ -13,8 +13,7 @@ public record PlaceOrderCommand(
 ) {
     public record OrderItemData(
         UUID productId,
-        int quantity,
-        UUID warehouseId
+        int quantity
     ) {
         public OrderItemData {
             if (productId == null) throw new IllegalArgumentException("Product ID is required");

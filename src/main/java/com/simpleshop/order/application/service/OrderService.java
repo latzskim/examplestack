@@ -9,8 +9,12 @@ import com.simpleshop.cart.application.query.GetCartQuery;
 import com.simpleshop.catalog.application.port.out.ProductRepository;
 import com.simpleshop.catalog.domain.model.Product;
 import com.simpleshop.catalog.domain.model.vo.ProductId;
+import com.simpleshop.inventory.application.command.AllocateStockCommand;
+import com.simpleshop.inventory.application.port.in.AllocateStockUseCase;
+import com.simpleshop.inventory.application.query.StockAllocationResult;
 import com.simpleshop.order.application.command.*;
 import com.simpleshop.order.application.port.in.*;
+import com.simpleshop.order.application.port.out.OrderNumberGenerator;
 import com.simpleshop.order.application.port.out.OrderRepository;
 import com.simpleshop.order.application.query.*;
 import com.simpleshop.order.domain.exception.EmptyOrderException;
@@ -36,20 +40,33 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
         CancelOrderUseCase, ShipOrderUseCase, DeliverOrderUseCase, GetOrderUseCase, ListUserOrdersUseCase {
     
     private final OrderRepository orderRepository;
+    private final OrderNumberGenerator orderNumberGenerator;
     private final ProductRepository productRepository;
     private final GetCartUseCase getCartUseCase;
     private final ClearCartUseCase clearCartUseCase;
+    private final AllocateStockUseCase allocateStockUseCase;
     
-    public OrderService(OrderRepository orderRepository, ProductRepository productRepository,
-                        GetCartUseCase getCartUseCase, ClearCartUseCase clearCartUseCase) {
+    public OrderService(OrderRepository orderRepository, OrderNumberGenerator orderNumberGenerator,
+                        ProductRepository productRepository, GetCartUseCase getCartUseCase, 
+                        ClearCartUseCase clearCartUseCase, AllocateStockUseCase allocateStockUseCase) {
         this.orderRepository = orderRepository;
+        this.orderNumberGenerator = orderNumberGenerator;
         this.productRepository = productRepository;
         this.getCartUseCase = getCartUseCase;
         this.clearCartUseCase = clearCartUseCase;
+        this.allocateStockUseCase = allocateStockUseCase;
     }
     
     @Override
     public OrderView execute(PlaceOrderCommand command) {
+        List<AllocateStockCommand.AllocationRequest> allocationRequests = command.items().stream()
+            .map(item -> new AllocateStockCommand.AllocationRequest(item.productId(), item.quantity()))
+            .toList();
+        
+        StockAllocationResult allocationResult = allocateStockUseCase.allocate(
+            new AllocateStockCommand(allocationRequests)
+        );
+        
         Address shippingAddress = Address.of(
             command.street(),
             command.city(),
@@ -64,18 +81,20 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
             
             com.simpleshop.catalog.domain.model.vo.Money catalogPrice = product.getPrice();
             Money sharedPrice = Money.of(catalogPrice.getAmount(), catalogPrice.getCurrency());
+            UUID warehouseId = allocationResult.getWarehouseIdForProduct(itemData.productId());
             
             OrderItem item = OrderItem.create(
                 product.getId(),
                 product.getName(),
                 itemData.quantity(),
                 sharedPrice,
-                itemData.warehouseId()
+                warehouseId
             );
             orderItems.add(item);
         }
         
-        Order order = Order.place(command.userId(), shippingAddress, orderItems);
+        OrderNumber orderNumber = orderNumberGenerator.generate();
+        Order order = Order.place(orderNumber, command.userId(), shippingAddress, orderItems);
         order = orderRepository.save(order);
         
         return toOrderView(order);
@@ -89,6 +108,14 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
             throw new EmptyOrderException();
         }
         
+        List<AllocateStockCommand.AllocationRequest> allocationRequests = cart.items().stream()
+            .map(item -> new AllocateStockCommand.AllocationRequest(item.productId(), item.quantity()))
+            .toList();
+        
+        StockAllocationResult allocationResult = allocateStockUseCase.allocate(
+            new AllocateStockCommand(allocationRequests)
+        );
+        
         Address shippingAddress = Address.of(
             command.street(),
             command.city(),
@@ -98,12 +125,13 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
         
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItemView cartItem : cart.items()) {
+            UUID warehouseId = allocationResult.getWarehouseIdForProduct(cartItem.productId());
             OrderItem item = OrderItem.create(
                 cartItem.productId(),
                 cartItem.productName(),
                 cartItem.quantity(),
                 Money.of(cartItem.price(), cartItem.currency()),
-                command.warehouseId() // TODO: form does not have warehouseId, should be take from Product/Item
+                warehouseId
             );
             orderItems.add(item);
         }
@@ -111,7 +139,8 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
         UUID userId = command.userId() != null ? command.userId() : 
             UUID.fromString("00000000-0000-0000-0000-000000000000");
         
-        Order order = Order.place(userId, shippingAddress, orderItems);
+        OrderNumber orderNumber = orderNumberGenerator.generate();
+        Order order = Order.place(orderNumber, userId, shippingAddress, orderItems);
         order = orderRepository.save(order);
         
         clearCartUseCase.execute(new ClearCartCommand(command.sessionId(), command.userId()));

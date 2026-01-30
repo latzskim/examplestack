@@ -1,5 +1,6 @@
 package com.simpleshop.order.infrastructure.adapter.in.web;
 
+import com.simpleshop.order.application.command.CancelOrderCommand;
 import com.simpleshop.order.application.command.ConfirmOrderCommand;
 import com.simpleshop.order.application.command.DeliverOrderCommand;
 import com.simpleshop.order.application.command.ShipOrderCommand;
@@ -25,17 +26,20 @@ import java.util.UUID;
 public class OrderAdminController {
     
     private final ConfirmOrderUseCase confirmOrderUseCase;
+    private final CancelOrderUseCase cancelOrderUseCase;
     private final ShipOrderUseCase shipOrderUseCase;
     private final DeliverOrderUseCase deliverOrderUseCase;
     private final GetOrderUseCase getOrderUseCase;
     private final OrderRepository orderRepository;
     
     public OrderAdminController(ConfirmOrderUseCase confirmOrderUseCase,
+                                CancelOrderUseCase cancelOrderUseCase,
                                 ShipOrderUseCase shipOrderUseCase,
                                 DeliverOrderUseCase deliverOrderUseCase,
                                 GetOrderUseCase getOrderUseCase,
                                 OrderRepository orderRepository) {
         this.confirmOrderUseCase = confirmOrderUseCase;
+        this.cancelOrderUseCase = cancelOrderUseCase;
         this.shipOrderUseCase = shipOrderUseCase;
         this.deliverOrderUseCase = deliverOrderUseCase;
         this.getOrderUseCase = getOrderUseCase;
@@ -89,6 +93,28 @@ public class OrderAdminController {
             redirectAttributes.addFlashAttribute("success", "Order marked as delivered");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/orders/" + orderId;
+    }
+    
+    @PostMapping("/{orderId}/payment-success")
+    public String simulatePaymentSuccess(@PathVariable UUID orderId, RedirectAttributes redirectAttributes) {
+        try {
+            confirmOrderUseCase.execute(new ConfirmOrderCommand(orderId));
+            redirectAttributes.addFlashAttribute("success", "Payment successful! Order confirmed and stock deducted from inventory.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Payment simulation failed: " + e.getMessage());
+        }
+        return "redirect:/admin/orders/" + orderId;
+    }
+    
+    @PostMapping("/{orderId}/payment-failed")
+    public String simulatePaymentFailed(@PathVariable UUID orderId, RedirectAttributes redirectAttributes) {
+        try {
+            cancelOrderUseCase.execute(new CancelOrderCommand(orderId, "Payment failed"));
+            redirectAttributes.addFlashAttribute("success", "Payment failed! Order cancelled and reserved stock released.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Payment failure simulation failed: " + e.getMessage());
         }
         return "redirect:/admin/orders/" + orderId;
     }

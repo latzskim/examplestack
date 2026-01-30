@@ -27,8 +27,13 @@ public class OrderStatusTest {
     }
 
     @Test
-    public void canTransitionTo_confirmedToCancelled() {
-        assertTrue(OrderStatus.CONFIRMED.canTransitionTo(OrderStatus.CANCELLED));
+    public void canTransitionTo_confirmedToCancelled_notAllowed() {
+        assertFalse(OrderStatus.CONFIRMED.canTransitionTo(OrderStatus.CANCELLED));
+    }
+
+    @Test
+    public void canTransitionTo_confirmedToShipped() {
+        assertTrue(OrderStatus.CONFIRMED.canTransitionTo(OrderStatus.SHIPPED));
     }
 
     @Test
@@ -37,8 +42,8 @@ public class OrderStatusTest {
     }
 
     @Test
-    public void canTransitionTo_processingToCancelled() {
-        assertTrue(OrderStatus.PROCESSING.canTransitionTo(OrderStatus.CANCELLED));
+    public void canTransitionTo_processingToCancelled_notAllowed() {
+        assertFalse(OrderStatus.PROCESSING.canTransitionTo(OrderStatus.CANCELLED));
     }
 
     @Test
@@ -79,5 +84,15 @@ public class OrderStatusTest {
         assertFalse(OrderStatus.CONFIRMED.isFinal());
         assertFalse(OrderStatus.PROCESSING.isFinal());
         assertFalse(OrderStatus.SHIPPED.isFinal());
+    }
+
+    @Test
+    public void isCancellable_trueOnlyForPending() {
+        assertTrue(OrderStatus.PENDING.isCancellable());
+        assertFalse(OrderStatus.CONFIRMED.isCancellable());
+        assertFalse(OrderStatus.PROCESSING.isCancellable());
+        assertFalse(OrderStatus.SHIPPED.isCancellable());
+        assertFalse(OrderStatus.DELIVERED.isCancellable());
+        assertFalse(OrderStatus.CANCELLED.isCancellable());
     }
 }

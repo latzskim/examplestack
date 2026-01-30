@@ -2,8 +2,6 @@ package com.simpleshop.order.domain.model.vo;
 
 import org.testng.annotations.Test;
 
-import java.time.LocalDate;
-
 import static org.testng.Assert.*;
 
 public class OrderNumberTest {
@@ -37,20 +35,6 @@ public class OrderNumberTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void of_throwsForWrongSequenceDigits() {
         OrderNumber.of("ORD-2024-001");
-    }
-
-    @Test
-    public void generate_createsValidOrderNumber() {
-        OrderNumber orderNumber = OrderNumber.generate();
-        assertNotNull(orderNumber.getValue());
-        assertTrue(orderNumber.getValue().startsWith("ORD-" + LocalDate.now().getYear() + "-"));
-    }
-
-    @Test
-    public void generate_createsUniqueNumbers() {
-        OrderNumber num1 = OrderNumber.generate();
-        OrderNumber num2 = OrderNumber.generate();
-        assertNotEquals(num1, num2);
     }
 
     @Test

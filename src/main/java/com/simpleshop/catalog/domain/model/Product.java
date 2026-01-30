@@ -74,7 +74,7 @@ public class Product extends AggregateRoot<Product> {
         product.registerEvent(new ProductCreated(product.getProductId(), product.name, product.sku));
         return product;
     }
-    
+
     public void update(String name, String description, Money price, UUID categoryId, String imageUrl) {
         if (name == null || name.isBlank()) throw new IllegalArgumentException("Product name cannot be empty");
         if (price == null) throw new IllegalArgumentException("Price cannot be null");

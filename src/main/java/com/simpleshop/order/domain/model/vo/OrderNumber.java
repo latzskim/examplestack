@@ -2,14 +2,10 @@ package com.simpleshop.order.domain.model.vo;
 
 import com.simpleshop.shared.domain.model.ValueObject;
 import jakarta.persistence.Embeddable;
-import java.time.LocalDate;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Embeddable
 public final class OrderNumber extends ValueObject {
-    // TODO: It should be taken from DATABASE, on application restart, the sequence is being zeroed...
-    private static final AtomicLong SEQUENCE = new AtomicLong(0);
     
     private String value;
     
@@ -23,12 +19,6 @@ public final class OrderNumber extends ValueObject {
     
     public static OrderNumber of(String value) {
         return new OrderNumber(value);
-    }
-    
-    public static OrderNumber generate() {
-        int year = LocalDate.now().getYear();
-        long seq = SEQUENCE.incrementAndGet();
-        return new OrderNumber(String.format("ORD-%d-%05d", year, seq));
     }
     
     public String getValue() {

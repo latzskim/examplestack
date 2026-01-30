@@ -18,13 +18,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional
 public class InventoryService implements CreateWarehouseUseCase, ReplenishStockUseCase,
         ReserveStockUseCase, ReleaseStockUseCase, GetWarehouseUseCase,
-        CheckStockAvailabilityUseCase, ListWarehouseStockUseCase {
+        CheckStockAvailabilityUseCase, ListWarehouseStockUseCase, AllocateStockUseCase,
+        ConfirmStockReservationUseCase {
 
     private final StockRepository stockRepository;
     private final WarehouseRepository warehouseRepository;
@@ -134,5 +138,49 @@ public class InventoryService implements CreateWarehouseUseCase, ReplenishStockU
             stock.getReservedQuantity().getValue(),
             stock.getAvailableQuantity().getValue()
         );
+    }
+
+    @Override
+    public StockAllocationResult allocate(AllocateStockCommand command) {
+        List<StockAllocationResult.Allocation> allocations = new ArrayList<>();
+        List<Stock> stocksToSave = new ArrayList<>();
+        
+        for (AllocateStockCommand.AllocationRequest request : command.items()) {
+            List<Stock> availableStocks = stockRepository.findByProductId(request.productId());
+            
+            Stock selectedStock = availableStocks.stream()
+                .filter(s -> s.getAvailableQuantity().getValue() >= request.quantity())
+                .max(Comparator.comparingInt(s -> s.getAvailableQuantity().getValue()))
+                .orElseThrow(() -> {
+                    int totalAvailable = availableStocks.stream()
+                        .mapToInt(s -> s.getAvailableQuantity().getValue())
+                        .sum();
+                    return new InsufficientStockException(request.productId(), totalAvailable, request.quantity());
+                });
+            
+            selectedStock.reserve(Quantity.of(request.quantity()));
+            stocksToSave.add(selectedStock);
+            
+            allocations.add(new StockAllocationResult.Allocation(
+                request.productId(),
+                selectedStock.getWarehouseId(),
+                request.quantity()
+            ));
+        }
+        
+        for (Stock stock : stocksToSave) {
+            stockRepository.save(stock);
+        }
+        
+        return new StockAllocationResult(allocations);
+    }
+
+    @Override
+    public void confirm(ConfirmStockReservationCommand command) {
+        Stock stock = stockRepository.findByProductIdAndWarehouseId(command.productId(), command.warehouseId())
+            .orElseThrow(() -> new StockNotFoundException(command.productId(), command.warehouseId()));
+
+        stock.confirmReservation(Quantity.of(command.quantity()));
+        stockRepository.save(stock);
     }
 }

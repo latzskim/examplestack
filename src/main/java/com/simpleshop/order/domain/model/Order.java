@@ -72,9 +72,9 @@ public class Order extends AggregateRoot<Order> {
     
     protected Order() {}
     
-    private Order(UUID userId, Address shippingAddress, List<OrderItem> items, Money totalAmount) {
+    private Order(OrderNumber orderNumber, UUID userId, Address shippingAddress, List<OrderItem> items, Money totalAmount) {
         this.id = UUID.randomUUID();
-        this.orderNumber = OrderNumber.generate();
+        this.orderNumber = orderNumber;
         this.userId = userId;
         this.shippingAddress = shippingAddress;
         this.items = new ArrayList<>(items);
@@ -83,13 +83,14 @@ public class Order extends AggregateRoot<Order> {
         this.createdAt = Instant.now();
     }
     
-    public static Order place(UUID userId, Address shippingAddress, List<OrderItem> items) {
+    public static Order place(OrderNumber orderNumber, UUID userId, Address shippingAddress, List<OrderItem> items) {
+        if (orderNumber == null) throw new IllegalArgumentException("Order number cannot be null");
         if (userId == null) throw new IllegalArgumentException("User ID cannot be null");
         if (shippingAddress == null) throw new IllegalArgumentException("Shipping address cannot be null");
         if (items == null || items.isEmpty()) throw new EmptyOrderException();
         
         Money total = calculateTotal(items);
-        Order order = new Order(userId, shippingAddress, items, total);
+        Order order = new Order(orderNumber, userId, shippingAddress, items, total);
         
         order.registerEvent(new OrderPlaced(
             order.id,

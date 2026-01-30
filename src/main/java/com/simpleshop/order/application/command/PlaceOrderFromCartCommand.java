@@ -8,8 +8,7 @@ public record PlaceOrderFromCartCommand(
     String street,
     String city,
     String postalCode,
-    String country,
-    UUID warehouseId
+    String country
 ) {
     public PlaceOrderFromCartCommand {
         if (userId == null && sessionId == null) throw new IllegalArgumentException("Either userId or sessionId is required");
