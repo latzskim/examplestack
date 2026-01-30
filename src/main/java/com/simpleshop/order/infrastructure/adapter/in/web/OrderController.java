@@ -8,8 +8,12 @@ import com.simpleshop.order.application.command.CancelOrderCommand;
 import com.simpleshop.order.application.command.PlaceOrderFromCartCommand;
 import com.simpleshop.order.application.port.in.*;
 import com.simpleshop.order.application.query.*;
+import com.simpleshop.shipping.application.port.in.ListShipmentsByOrderUseCase;
+import com.simpleshop.shipping.application.query.ShipmentView;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -17,29 +21,33 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
 import java.util.UUID;
 
 @Controller
 public class OrderController {
-    
+
     private static final String CART_SESSION_ID = "CART_SESSION_ID";
-    
+
     private final PlaceOrderFromCartUseCase placeOrderFromCartUseCase;
     private final GetOrderUseCase getOrderUseCase;
     private final ListUserOrdersUseCase listUserOrdersUseCase;
     private final CancelOrderUseCase cancelOrderUseCase;
     private final GetCartUseCase getCartUseCase;
-    
+    private final ListShipmentsByOrderUseCase listShipmentsByOrderUseCase;
+
     public OrderController(PlaceOrderFromCartUseCase placeOrderFromCartUseCase,
                            GetOrderUseCase getOrderUseCase,
                            ListUserOrdersUseCase listUserOrdersUseCase,
                            CancelOrderUseCase cancelOrderUseCase,
-                           GetCartUseCase getCartUseCase) {
+                           GetCartUseCase getCartUseCase,
+                           ListShipmentsByOrderUseCase listShipmentsByOrderUseCase) {
         this.placeOrderFromCartUseCase = placeOrderFromCartUseCase;
         this.getOrderUseCase = getOrderUseCase;
         this.listUserOrdersUseCase = listUserOrdersUseCase;
         this.cancelOrderUseCase = cancelOrderUseCase;
         this.getCartUseCase = getCartUseCase;
+        this.listShipmentsByOrderUseCase = listShipmentsByOrderUseCase;
     }
     
     @GetMapping("/checkout")
@@ -123,8 +131,14 @@ public class OrderController {
         OrderView order = getOrderUseCase.execute(new GetOrderQuery(orderId))
             .filter(o -> o.userId().equals(user.getUserId().getValue()))
             .orElseThrow(() -> new IllegalArgumentException("Order not found"));
-        
+
+        // Fetch shipments for this order
+        Page<ShipmentView> shipments = listShipmentsByOrderUseCase.listShipmentsByOrder(
+            orderId, PageRequest.of(0, 100)
+        );
+
         model.addAttribute("order", order);
+        model.addAttribute("shipments", shipments.getContent());
         return "orders/detail";
     }
     

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/main :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Track Shipment</title>
+</head>
+<body>
+<main>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Track Your Shipment</h4>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                        
+                        <form th:action="@{/shipments/track}" method="post">
+                            <div class="mb-3">
+                                <label for="trackingNumber" class="form-label">Tracking Number</label>
+                                <input type="text" class="form-control form-control-lg" id="trackingNumber" 
+                                       name="trackingNumber" placeholder="SHIP-20240130-00001" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Track Shipment</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4 text-muted">
+                    <small>Enter your tracking number to check the status of your shipment</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

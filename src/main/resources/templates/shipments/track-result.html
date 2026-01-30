@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/main :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="'Track: ' + ${tracking.trackingNumber}">Track Shipment</title>
+</head>
+<body>
+<main>
+    <div class="container py-4">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/shipments/track}">Track Shipment</a></li>
+                <li class="breadcrumb-item active" th:text="${tracking.trackingNumber}">SHIP-2024-00001</li>
+            </ol>
+        </nav>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Shipment Details</h4>
+                        <span class="badge fs-6"
+                              th:classappend="${tracking.currentStatus.name() == 'DELIVERED' ? 'bg-success' : 
+                                               (tracking.currentStatus.name() == 'FAILED' ? 'bg-danger' : 
+                                               (tracking.currentStatus.name() == 'OUT_FOR_DELIVERY' ? 'bg-warning' : 'bg-info'))}"
+                              th:text="${tracking.currentStatus.displayName}">In Transit</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-2">Tracking Number</h6>
+                                <p class="fs-5 fw-bold text-primary" th:text="${tracking.trackingNumber}">SHIP-2024-00001</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-2">Destination</h6>
+                                <p th:text="${tracking.destinationAddress}">123 Main St, City, 12345, Country</p>
+                            </div>
+                        </div>
+                        
+                        <h6 class="text-muted mb-3">Status History</h6>
+                        <div class="timeline">
+                            <div th:each="status, iterStat : ${tracking.statusHistory}" 
+                                 th:class="'timeline-item ' + ${iterStat.first ? 'active' : ''}"
+                                 class="timeline-item active">
+                                <div class="timeline-marker"
+                                     th:classappend="${iterStat.first ? 'bg-primary' : 'bg-secondary'}"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1" th:text="${status.status.displayName}">Status</h6>
+                                    <p class="mb-0 text-muted small" 
+                                       th:if="${status.location}" 
+                                       th:text="${status.location}">Location</p>
+                                    <p class="mb-0 text-muted small" 
+                                       th:if="${status.notes}" 
+                                       th:text="${status.notes}">Notes</p>
+                                    <small class="text-muted" 
+                                           th:text="${#temporals.format(status.changedAt, 'MMM dd, yyyy HH:mm')}">
+                                        Jan 30, 2024 14:30
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <a th:href="@{/shipments/track}" class="btn btn-outline-primary">Track Another Shipment</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+        .timeline-marker {
+            position: absolute;
+            left: -26px;
+            top: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #6c757d;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 2px #dee2e6;
+        }
+        .timeline-item.active .timeline-marker {
+            box-shadow: 0 0 0 2px #0d6efd;
+        }
+    </style>
+</main>
+</body>
+</html>

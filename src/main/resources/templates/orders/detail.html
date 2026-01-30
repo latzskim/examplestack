@@ -115,6 +115,46 @@
             </div>
         </div>
         
+        <!-- Shipment Tracking Section -->
+        <div class="row mt-4" th:if="${shipments != null and !shipments.isEmpty()}">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Shipment Tracking</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:each="shipment : ${shipments}" class="mb-4 pb-4 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <strong class="text-primary" th:text="${shipment.trackingNumber}">SHIP-2025-00001</strong>
+                                    <span class="badge ms-2"
+                                          th:classappend="${shipment.status.name() == 'DELIVERED' ? 'bg-success' :
+                                                           (shipment.status.name() == 'FAILED' ? 'bg-danger' :
+                                                           (shipment.status.name() == 'OUT_FOR_DELIVERY' ? 'bg-warning' :
+                                                           (shipment.status.name() == 'SHIPPED' or shipment.status.name() == 'IN_TRANSIT' ? 'bg-info' : 'bg-secondary')))}"
+                                          th:text="${shipment.status.displayName}">Status</span>
+                                </div>
+                                <a th:href="@{/shipments/track/{num}(num=${shipment.trackingNumber})}" class="btn btn-sm btn-outline-primary">
+                                    Track Package
+                                </a>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted">Destination:</small>
+                                    <p class="mb-0" th:text="${shipment.destinationCity} + ', ' + ${shipment.destinationCountry}">City, Country</p>
+                                </div>
+                                <div class="col-md-6" th:if="${shipment.estimatedDelivery}">
+                                    <small class="text-muted">Estimated Delivery:</small>
+                                    <p class="mb-0" th:text="${#temporals.format(shipment.estimatedDelivery, 'MMM dd, yyyy')}">Jan 30, 2025</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="mt-4">
             <a th:href="@{/orders}" class="btn btn-outline-secondary">Back to Orders</a>
         </div>
