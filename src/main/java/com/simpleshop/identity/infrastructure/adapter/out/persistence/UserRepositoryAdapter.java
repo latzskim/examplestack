@@ -21,17 +21,17 @@ public class UserRepositoryAdapter implements UserRepository {
     public User save(User user) {
         return jpaRepository.save(user);
     }
-    
+
     @Override
     public Optional<User> findById(UserId id) {
         return jpaRepository.findById(id.getValue());
     }
-    
+
     @Override
     public Optional<User> findByEmail(Email email) {
         return jpaRepository.findByEmailValue(email.getValue());
     }
-    
+
     @Override
     public boolean existsByEmail(Email email) {
         return jpaRepository.existsByEmailValue(email.getValue());

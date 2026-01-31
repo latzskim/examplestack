@@ -12,6 +12,7 @@ import com.simpleshop.cart.application.port.in.UpdateItemQuantityUseCase;
 import com.simpleshop.cart.application.query.CartView;
 import com.simpleshop.cart.application.query.GetCartQuery;
 import com.simpleshop.identity.infrastructure.security.ShopUserDetails;
+import io.micrometer.tracing.annotation.NewSpan;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -49,6 +50,7 @@ public class CartController {
     }
     
     @GetMapping
+    @NewSpan
     public String viewCart(HttpSession session,
                            @AuthenticationPrincipal ShopUserDetails user,
                            Model model) {
@@ -66,6 +68,7 @@ public class CartController {
     }
     
     @PostMapping("/add")
+    @NewSpan
     public String addItem(@RequestParam UUID productId,
                           @RequestParam int quantity,
                           HttpSession session,
@@ -83,6 +86,7 @@ public class CartController {
     }
     
     @PostMapping("/remove/{productId}")
+    @NewSpan
     public String removeItem(@PathVariable UUID productId,
                              HttpSession session,
                              @AuthenticationPrincipal ShopUserDetails user) {
@@ -99,6 +103,7 @@ public class CartController {
     }
     
     @PostMapping("/update")
+    @NewSpan
     public String updateQuantity(@RequestParam UUID productId,
                                  @RequestParam int quantity,
                                  HttpSession session,
@@ -116,6 +121,7 @@ public class CartController {
     }
     
     @PostMapping("/clear")
+    @NewSpan
     public String clearCart(HttpSession session,
                             @AuthenticationPrincipal ShopUserDetails user) {
         String sessionId = getSessionId(session);

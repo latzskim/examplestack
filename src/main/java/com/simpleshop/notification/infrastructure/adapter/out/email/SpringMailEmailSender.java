@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import io.micrometer.tracing.annotation.NewSpan;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -38,6 +39,7 @@ public class SpringMailEmailSender implements EmailSender {
     }
     
     @Override
+    @NewSpan
     public void sendEmail(Email recipient, String subject, NotificationType type, Map<String, Object> templateData) {
         try {
             MimeMessage message = mailSender.createMimeMessage();

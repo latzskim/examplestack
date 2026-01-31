@@ -5,6 +5,7 @@ import com.simpleshop.identity.application.port.out.UserRepository;
 import com.simpleshop.identity.application.query.GetUserByEmailQuery;
 import com.simpleshop.identity.application.query.GetUserQuery;
 import com.simpleshop.identity.domain.model.User;
+import io.micrometer.tracing.annotation.NewSpan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,11 +22,13 @@ public class UserQueryService implements GetUserUseCase {
     }
     
     @Override
+    @NewSpan("identity.getUser")
     public Optional<User> getUser(GetUserQuery query) {
         return userRepository.findById(query.userId());
     }
     
     @Override
+    @NewSpan("identity.getUserByEmail")
     public Optional<User> getUserByEmail(GetUserByEmailQuery query) {
         return userRepository.findByEmail(query.email());
     }

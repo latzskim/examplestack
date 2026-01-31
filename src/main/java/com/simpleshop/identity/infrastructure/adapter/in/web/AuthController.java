@@ -1,5 +1,6 @@
 package com.simpleshop.identity.infrastructure.adapter.in.web;
 
+import io.micrometer.tracing.annotation.NewSpan;
 import com.simpleshop.identity.application.command.RegisterUserCommand;
 import com.simpleshop.identity.application.port.in.RegisterUserUseCase;
 import com.simpleshop.identity.domain.exception.EmailAlreadyExistsException;
@@ -31,6 +32,7 @@ public class AuthController {
     }
     
     @PostMapping("/register")
+    @NewSpan
     public String register(
             @RequestParam String email,
             @RequestParam String password,

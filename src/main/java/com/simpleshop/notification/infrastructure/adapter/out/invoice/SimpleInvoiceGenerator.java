@@ -12,6 +12,7 @@ import com.lowagie.text.pdf.PdfWriter;
 import com.simpleshop.notification.application.port.out.InvoiceGenerator;
 import com.simpleshop.order.application.query.OrderItemView;
 import com.simpleshop.order.application.query.OrderView;
+import io.micrometer.tracing.annotation.NewSpan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ public class SimpleInvoiceGenerator implements InvoiceGenerator {
     private static final Font NORMAL_FONT = new Font(Font.HELVETICA, 10, Font.NORMAL);
     
     @Override
+    @NewSpan
     public byte[] generateInvoice(OrderView order) {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

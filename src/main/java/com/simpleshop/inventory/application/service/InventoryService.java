@@ -14,6 +14,8 @@ import com.simpleshop.inventory.domain.model.vo.StockId;
 import com.simpleshop.inventory.domain.model.vo.WarehouseId;
 import com.simpleshop.shared.domain.model.vo.Address;
 import com.simpleshop.shared.domain.model.vo.Quantity;
+import io.micrometer.tracing.annotation.NewSpan;
+import io.micrometer.tracing.annotation.SpanTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ public class InventoryService implements CreateWarehouseUseCase, ReplenishStockU
     }
 
     @Override
+    @NewSpan("inventory.createWarehouse")
     public WarehouseView create(CreateWarehouseCommand command) {
         Address address = Address.of(
             command.street(),
@@ -52,6 +55,7 @@ public class InventoryService implements CreateWarehouseUseCase, ReplenishStockU
     }
 
     @Override
+    @NewSpan("inventory.replenishStock")
     public StockView replenish(ReplenishStockCommand command) {
         if (!warehouseRepository.existsById(WarehouseId.of(command.warehouseId()))) {
             throw new WarehouseNotFoundException(command.warehouseId());
@@ -66,6 +70,7 @@ public class InventoryService implements CreateWarehouseUseCase, ReplenishStockU
     }
 
     @Override
+    @NewSpan("inventory.reserveStock")
     public void reserve(ReserveStockCommand command) {
         Stock stock = stockRepository.findByProductIdAndWarehouseId(command.productId(), command.warehouseId())
             .orElseThrow(() -> new StockNotFoundException(command.productId(), command.warehouseId()));
@@ -75,6 +80,7 @@ public class InventoryService implements CreateWarehouseUseCase, ReplenishStockU
     }
 
     @Override
+    @NewSpan("inventory.releaseStock")
     public void release(ReleaseStockCommand command) {
         Stock stock = stockRepository.findByProductIdAndWarehouseId(command.productId(), command.warehouseId())
             .orElseThrow(() -> new StockNotFoundException(command.productId(), command.warehouseId()));
@@ -85,6 +91,7 @@ public class InventoryService implements CreateWarehouseUseCase, ReplenishStockU
 
     @Override
     @Transactional(readOnly = true)
+    @NewSpan("inventory.getWarehouse")
     public Optional<WarehouseView> get(GetWarehouseQuery query) {
         return warehouseRepository.findById(WarehouseId.of(query.warehouseId()))
             .map(this::toWarehouseView);
@@ -92,6 +99,7 @@ public class InventoryService implements CreateWarehouseUseCase, ReplenishStockU
 
     @Override
     @Transactional(readOnly = true)
+    @NewSpan("inventory.checkStockAvailability")
     public ProductAvailabilityView check(CheckStockAvailabilityQuery query) {
         int totalAvailable;
         int totalReserved;
@@ -111,6 +119,7 @@ public class InventoryService implements CreateWarehouseUseCase, ReplenishStockU
 
     @Override
     @Transactional(readOnly = true)
+    @NewSpan("inventory.listWarehouseStock")
     public Page<StockView> list(GetWarehouseStockQuery query) {
         PageRequest pageable = PageRequest.of(query.page(), query.size());
         return stockRepository.findByWarehouseId(query.warehouseId(), pageable)
@@ -141,6 +150,7 @@ public class InventoryService implements CreateWarehouseUseCase, ReplenishStockU
     }
 
     @Override
+    @NewSpan("inventory.allocateStock")
     public StockAllocationResult allocate(AllocateStockCommand command) {
         List<StockAllocationResult.Allocation> allocations = new ArrayList<>();
         List<Stock> stocksToSave = new ArrayList<>();
@@ -176,6 +186,7 @@ public class InventoryService implements CreateWarehouseUseCase, ReplenishStockU
     }
 
     @Override
+    @NewSpan("inventory.confirmStockReservation")
     public void confirm(ConfirmStockReservationCommand command) {
         Stock stock = stockRepository.findByProductIdAndWarehouseId(command.productId(), command.warehouseId())
             .orElseThrow(() -> new StockNotFoundException(command.productId(), command.warehouseId()));

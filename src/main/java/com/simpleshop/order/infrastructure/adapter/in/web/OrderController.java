@@ -1,5 +1,6 @@
 package com.simpleshop.order.infrastructure.adapter.in.web;
 
+import io.micrometer.tracing.annotation.NewSpan;
 import com.simpleshop.cart.application.port.in.GetCartUseCase;
 import com.simpleshop.cart.application.query.CartView;
 import com.simpleshop.cart.application.query.GetCartQuery;
@@ -68,6 +69,7 @@ public class OrderController {
     
     @PostMapping("/checkout")
     @PreAuthorize("isAuthenticated()")
+    @NewSpan
     public String processCheckout(@ModelAttribute CheckoutForm form,
                                   HttpSession session,
                                   @AuthenticationPrincipal ShopUserDetails user,
@@ -98,6 +100,7 @@ public class OrderController {
     
     @GetMapping("/checkout/confirmation/{orderId}")
     @PreAuthorize("isAuthenticated()")
+    @NewSpan
     public String showConfirmation(@PathVariable UUID orderId,
                                    @AuthenticationPrincipal ShopUserDetails user,
                                    Model model) {
@@ -111,6 +114,7 @@ public class OrderController {
     
     @GetMapping("/orders")
     @PreAuthorize("isAuthenticated()")
+    @NewSpan
     public String listOrders(@RequestParam(defaultValue = "0") int page,
                              @AuthenticationPrincipal ShopUserDetails user,
                              Model model) {
@@ -125,6 +129,7 @@ public class OrderController {
     
     @GetMapping("/orders/{orderId}")
     @PreAuthorize("isAuthenticated()")
+    @NewSpan
     public String viewOrder(@PathVariable UUID orderId,
                             @AuthenticationPrincipal ShopUserDetails user,
                             Model model) {
@@ -144,6 +149,7 @@ public class OrderController {
     
     @PostMapping("/orders/{orderId}/cancel")
     @PreAuthorize("isAuthenticated()")
+    @NewSpan
     public String cancelOrder(@PathVariable UUID orderId,
                               @RequestParam(required = false) String reason,
                               @AuthenticationPrincipal ShopUserDetails user,

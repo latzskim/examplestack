@@ -9,6 +9,7 @@ import com.simpleshop.shared.domain.model.vo.Address;
 import com.simpleshop.shipping.application.command.CreateShipmentCommand;
 import com.simpleshop.shipping.application.port.in.CreateShipmentUseCase;
 import com.simpleshop.shipping.application.query.ShipmentView;
+import io.micrometer.tracing.annotation.NewSpan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.modulith.events.ApplicationModuleListener;
@@ -43,6 +44,7 @@ public class ShippingEventListener {
     }
     
     @ApplicationModuleListener
+    @NewSpan
     public void onOrderConfirmed(OrderConfirmed event) {
         log.info("Order confirmed: {} - creating shipments", event.getOrderNumber());
         

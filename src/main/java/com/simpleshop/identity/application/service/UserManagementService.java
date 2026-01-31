@@ -5,6 +5,7 @@ import com.simpleshop.identity.application.port.out.UserRepository;
 import com.simpleshop.identity.domain.exception.UserNotFoundException;
 import com.simpleshop.identity.domain.model.User;
 import com.simpleshop.identity.domain.model.vo.UserId;
+import io.micrometer.tracing.annotation.NewSpan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class UserManagementService implements DeactivateUserUseCase {
     }
     
     @Override
+    @NewSpan("identity.deactivateUser")
     public void deactivate(UserId userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));

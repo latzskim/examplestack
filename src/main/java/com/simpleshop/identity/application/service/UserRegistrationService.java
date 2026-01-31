@@ -9,6 +9,8 @@ import com.simpleshop.identity.domain.model.User;
 import com.simpleshop.identity.domain.model.vo.PersonName;
 import com.simpleshop.identity.domain.model.vo.UserId;
 import com.simpleshop.shared.domain.model.vo.Email;
+import io.micrometer.tracing.annotation.NewSpan;
+import io.micrometer.tracing.annotation.SpanTag;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,7 @@ public class UserRegistrationService implements RegisterUserUseCase {
     }
     
     @Override
+    @NewSpan("identity.registerUser")
     public UserId register(RegisterUserCommand command) {
         Email email = Email.of(command.email());
         

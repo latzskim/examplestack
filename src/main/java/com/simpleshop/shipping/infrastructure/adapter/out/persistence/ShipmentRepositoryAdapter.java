@@ -24,17 +24,17 @@ public class ShipmentRepositoryAdapter implements ShipmentRepository {
     public Shipment save(Shipment shipment) {
         return jpaRepository.save(shipment);
     }
-    
+
     @Override
     public Optional<Shipment> findById(ShipmentId id) {
         return jpaRepository.findById(id.getValue());
     }
-    
+
     @Override
     public Optional<Shipment> findByTrackingNumber(TrackingNumber trackingNumber) {
         return jpaRepository.findByTrackingNumberValue(trackingNumber.getValue());
     }
-    
+
     @Override
     public Page<Shipment> findByOrderId(UUID orderId, Pageable pageable) {
         return jpaRepository.findByOrderIdOrderByCreatedAtDesc(orderId, pageable);

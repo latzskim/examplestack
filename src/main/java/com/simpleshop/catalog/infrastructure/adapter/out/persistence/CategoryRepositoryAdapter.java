@@ -21,12 +21,12 @@ public class CategoryRepositoryAdapter implements CategoryRepository {
     public Category save(Category category) {
         return jpaRepository.save(category);
     }
-    
+
     @Override
     public Optional<Category> findById(CategoryId id) {
         return jpaRepository.findById(id.getValue());
     }
-    
+
     @Override
     public List<Category> findByParentId(UUID parentId) {
         if (parentId == null) {
@@ -34,7 +34,7 @@ public class CategoryRepositoryAdapter implements CategoryRepository {
         }
         return jpaRepository.findByParentIdOrderBySortOrder(parentId);
     }
-    
+
     @Override
     public List<Category> findAll() {
         return jpaRepository.findAll();

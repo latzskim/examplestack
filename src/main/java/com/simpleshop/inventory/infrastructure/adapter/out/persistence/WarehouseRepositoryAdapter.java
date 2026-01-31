@@ -20,17 +20,17 @@ public class WarehouseRepositoryAdapter implements WarehouseRepository {
     public Optional<Warehouse> findById(WarehouseId id) {
         return jpaRepository.findById(id.getValue());
     }
-    
+
     @Override
     public List<Warehouse> findAll() {
         return jpaRepository.findAll();
     }
-    
+
     @Override
     public Warehouse save(Warehouse warehouse) {
         return jpaRepository.save(warehouse);
     }
-    
+
     @Override
     public boolean existsById(WarehouseId id) {
         return jpaRepository.existsById(id.getValue());

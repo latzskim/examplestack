@@ -1,5 +1,6 @@
 package com.simpleshop.inventory.infrastructure.adapter.in.web;
 
+import io.micrometer.tracing.annotation.NewSpan;
 import com.simpleshop.inventory.application.command.CreateWarehouseCommand;
 import com.simpleshop.inventory.application.port.in.CreateWarehouseUseCase;
 import com.simpleshop.inventory.application.port.in.GetWarehouseUseCase;
@@ -41,6 +42,7 @@ public class AdminWarehouseController {
     }
     
     @GetMapping
+    @NewSpan
     public String listWarehouses(Model model) {
         List<WarehouseView> warehouses = warehouseRepository.findAll().stream()
             .map(this::toView)
@@ -55,6 +57,7 @@ public class AdminWarehouseController {
     }
     
     @PostMapping
+    @NewSpan
     public String createWarehouse(
             @RequestParam String name,
             @RequestParam String street,
@@ -70,6 +73,7 @@ public class AdminWarehouseController {
     }
     
     @GetMapping("/{id}")
+    @NewSpan
     public String viewWarehouse(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "0") int page,

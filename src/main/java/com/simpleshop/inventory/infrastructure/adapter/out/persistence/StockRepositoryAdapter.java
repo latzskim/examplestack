@@ -23,32 +23,32 @@ public class StockRepositoryAdapter implements StockRepository {
     public Optional<Stock> findById(StockId id) {
         return jpaRepository.findById(id.getValue());
     }
-    
+
     @Override
     public Optional<Stock> findByProductIdAndWarehouseId(UUID productId, UUID warehouseId) {
         return jpaRepository.findByProductIdAndWarehouseId(productId, warehouseId);
     }
-    
+
     @Override
     public List<Stock> findByProductId(UUID productId) {
         return jpaRepository.findByProductId(productId);
     }
-    
+
     @Override
     public Page<Stock> findByWarehouseId(UUID warehouseId, Pageable pageable) {
         return jpaRepository.findByWarehouseId(warehouseId, pageable);
     }
-    
+
     @Override
     public Stock save(Stock stock) {
         return jpaRepository.save(stock);
     }
-    
+
     @Override
     public int sumAvailableByProductId(UUID productId) {
         return jpaRepository.sumAvailableByProductId(productId);
     }
-    
+
     @Override
     public int sumReservedByProductId(UUID productId) {
         return jpaRepository.sumReservedByProductId(productId);

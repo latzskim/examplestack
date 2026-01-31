@@ -8,19 +8,19 @@ A production-ready e-commerce application built with Java 25, following DDD, Hex
 
 ## Technology Stack
 
-| Category | Technology                                    |
-|----------|-----------------------------------------------|
-| Language | Java 25                                       |
-| Framework | Spring Boot 3.4+, Spring Modulith             |
-| Web | Spring MVC, Thymeleaf                         |
-| Security | Spring Security 6                             |
-| Database | PostgreSQL 18                                 |
-| Cache | Redis                                         |
-| ORM | Spring Data JPA / Hibernate 6                 |
-| Testing | TestNG (unit), JUnit 5 + Testcontainers (e2e) |
-| Tracing | Jaeger + Micrometer Tracing                   |
-| Email | Mailhog (local catch)                         |
-| Containers | Docker, Docker Compose, Testcontainers        |
+| Category | Technology                                        |
+|----------|---------------------------------------------------|
+| Language | Java 25                                           |
+| Framework | Spring Boot 4.0.1+, Spring Modulith               |
+| Web | Spring MVC, Thymeleaf                             |
+| Security | Spring Security 6                                 |
+| Database | PostgreSQL 18                                     |
+| Cache | Redis                                             |
+| ORM | Spring Data JPA / Hibernate 6                     |
+| Testing | TestNG (unit), JUnit 5 + Testcontainers (e2e)     |
+| Tracing | OpenTelemetry + Spring BOOT starter opentelemetry |
+| Email | Mailhog (local catch)                             |
+| Containers | Docker, Docker Compose, Testcontainers            |
 
 ---
 

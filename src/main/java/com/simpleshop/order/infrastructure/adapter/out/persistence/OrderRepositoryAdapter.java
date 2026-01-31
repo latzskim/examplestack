@@ -23,22 +23,22 @@ public class OrderRepositoryAdapter implements OrderRepository {
     public Order save(Order order) {
         return jpaRepository.save(order);
     }
-    
+
     @Override
     public Optional<Order> findById(OrderId id) {
         return jpaRepository.findById(id.getValue());
     }
-    
+
     @Override
     public Optional<Order> findByOrderNumber(OrderNumber orderNumber) {
         return jpaRepository.findByOrderNumberValue(orderNumber.getValue());
     }
-    
+
     @Override
     public Page<Order> findByUserId(UUID userId, Pageable pageable) {
         return jpaRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
     }
-    
+
     @Override
     public Page<Order> findAll(Pageable pageable) {
         return jpaRepository.findAllByOrderByCreatedAtDesc(pageable);

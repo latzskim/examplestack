@@ -20,7 +20,7 @@ public class NotificationLogRepositoryAdapter implements NotificationLogReposito
     public NotificationLog save(NotificationLog notificationLog) {
         return jpaRepository.save(notificationLog);
     }
-    
+
     @Override
     public Optional<NotificationLog> findById(NotificationId id) {
         return jpaRepository.findById(id);

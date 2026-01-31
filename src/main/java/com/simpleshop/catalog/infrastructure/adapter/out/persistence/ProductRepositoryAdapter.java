@@ -23,22 +23,22 @@ public class ProductRepositoryAdapter implements ProductRepository {
     public Product save(Product product) {
         return jpaRepository.save(product);
     }
-    
+
     @Override
     public Optional<Product> findById(ProductId id) {
         return jpaRepository.findById(id.getValue());
     }
-    
+
     @Override
     public Optional<Product> findBySku(Sku sku) {
         return jpaRepository.findBySkuValue(sku.getValue());
     }
-    
+
     @Override
     public boolean existsBySku(Sku sku) {
         return jpaRepository.existsBySkuValue(sku.getValue());
     }
-    
+
     @Override
     public Page<Product> findAll(UUID categoryId, Boolean activeOnly, Pageable pageable) {
         return jpaRepository.findAllWithFilters(categoryId, activeOnly, pageable);

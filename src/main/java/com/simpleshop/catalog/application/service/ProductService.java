@@ -14,6 +14,8 @@ import com.simpleshop.catalog.domain.model.vo.CategoryId;
 import com.simpleshop.catalog.domain.model.vo.Money;
 import com.simpleshop.catalog.domain.model.vo.ProductId;
 import com.simpleshop.catalog.domain.model.vo.Sku;
+import io.micrometer.tracing.annotation.NewSpan;
+import io.micrometer.tracing.annotation.SpanTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,7 @@ public class ProductService implements CreateProductUseCase, UpdateProductUseCas
     }
     
     @Override
+    @NewSpan("catalog.createProduct")
     public ProductView create(CreateProductCommand command) {
         Sku sku = Sku.of(command.sku());
         if (productRepository.existsBySku(sku)) {
@@ -56,6 +59,7 @@ public class ProductService implements CreateProductUseCase, UpdateProductUseCas
     }
     
     @Override
+    @NewSpan("catalog.updateProduct")
     public ProductView update(UpdateProductCommand command) {
         Product product = productRepository.findById(ProductId.of(command.productId()))
             .orElseThrow(() -> new ProductNotFoundException(command.productId()));
@@ -74,7 +78,8 @@ public class ProductService implements CreateProductUseCase, UpdateProductUseCas
     }
     
     @Override
-    public void deactivate(UUID productId) {
+    @NewSpan("catalog.deactivateProduct")
+    public void deactivate(@SpanTag("productId") UUID productId) {
         Product product = productRepository.findById(ProductId.of(productId))
             .orElseThrow(() -> new ProductNotFoundException(productId));
         
@@ -83,7 +88,8 @@ public class ProductService implements CreateProductUseCase, UpdateProductUseCas
     }
     
     @Override
-    public void activate(UUID productId) {
+    @NewSpan("catalog.activateProduct")
+    public void activate(@SpanTag("productId") UUID productId) {
         Product product = productRepository.findById(ProductId.of(productId))
             .orElseThrow(() -> new ProductNotFoundException(productId));
         
@@ -93,6 +99,7 @@ public class ProductService implements CreateProductUseCase, UpdateProductUseCas
     
     @Override
     @Transactional(readOnly = true)
+    @NewSpan("catalog.getProduct")
     public Optional<ProductView> get(GetProductQuery query) {
         return productRepository.findById(ProductId.of(query.productId()))
             .map(this::toProductView);
@@ -100,6 +107,7 @@ public class ProductService implements CreateProductUseCase, UpdateProductUseCas
     
     @Override
     @Transactional(readOnly = true)
+    @NewSpan("catalog.listProducts")
     public Page<ProductListView> list(ListProductsQuery query) {
         PageRequest pageable = PageRequest.of(query.page(), query.size());
         return productRepository.findAll(query.categoryId(), query.activeOnly(), pageable)
