@@ -807,7 +807,7 @@ hasRole(ADMIN): /admin/**
 - Log levels: ERROR for exceptions, WARN for business rule violations, INFO for state changes, DEBUG for detailed flow
 - Sensitive data masking (passwords, emails partially)
 
-### Metrics (Micrometer)
+### Metrics (OpenTelemetry)
 - Request latency
 - Error rates
 - Cache hit/miss ratio
@@ -1137,10 +1137,10 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 - [ ] Unit tests for Notification domain
 
 ### Phase 9: Observability (Week 5)
-- [ ] Jaeger tracing configuration
+- [ ] LGTM stack
 - [ ] Custom spans
 - [ ] Structured logging
-- [ ] Micrometer metrics
+- [ ] OpenTelemetry metrics (java agent)
 
 ### Phase 10: E2E Tests & Polish (Week 5-6)
 - [ ] Testcontainers setup
