@@ -5,61 +5,122 @@
 </head>
 <body>
 <main>
-    <div class="container py-4">
-        <nav aria-label="breadcrumb">
+    <div class="container py-5">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
                 <li class="breadcrumb-item"><a th:href="@{/products}">Products</a></li>
                 <li class="breadcrumb-item active" th:text="${product.name()}">Product</li>
             </ol>
         </nav>
-        
-        <div class="row">
-            <div class="col-md-6">
-                <img th:if="${product.imageUrl() != null}" th:src="${product.imageUrl()}" class="img-fluid rounded" alt="Product image">
-                <div th:if="${product.imageUrl() == null}" class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 400px;">
-                    <span class="text-muted">No image available</span>
+
+        <div class="row g-5">
+            <!-- Product Image -->
+            <div class="col-lg-6">
+                <div class="card overflow-hidden">
+                    <img th:if="${product.imageUrl() != null}" th:src="${product.imageUrl()}" class="img-fluid w-100" alt="Product image" style="max-height: 500px; object-fit: cover;">
+                    <div th:if="${product.imageUrl() == null}" class="bg-light d-flex align-items-center justify-content-center" style="height: 500px;">
+                        <div class="text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="text-muted mb-3" viewBox="0 0 16 16">
+                                <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                            </svg>
+                            <p class="text-muted mb-0">No image available</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="col-md-6">
-                <h1 th:text="${product.name()}">Product Name</h1>
-                
-                <p class="text-muted mb-2">
-                    SKU: <span th:text="${product.sku()}">SKU123</span>
-                </p>
-                
-                <p th:if="${product.categoryName() != null}" class="text-muted mb-3">
-                    Category: <span th:text="${product.categoryName()}">Category</span>
-                </p>
-                
-                <h3 class="text-primary mb-3">
-                    <span th:text="${#numbers.formatDecimal(product.price(), 1, 2)}">0.00</span>
-                    <span th:text="${product.currency()}">USD</span>
-                </h3>
-                
-                <p class="mb-4">
-                    <span th:if="${stockAvailable > 0}" class="text-success fw-bold">
-                        <span th:text="${stockAvailable}">0</span> in stock
-                    </span>
-                    <span th:if="${stockAvailable == 0}" class="text-danger fw-bold">
-                        Out of Stock
-                    </span>
-                </p>
-                
-                <div th:if="${product.description() != null}" class="mb-4">
-                    <h5>Description</h5>
-                    <p th:text="${product.description()}">Product description goes here.</p>
-                </div>
-                
-                <form th:action="@{/cart/add}" method="post">
-                    <input type="hidden" name="productId" th:value="${product.id()}">
-                    <div class="mb-3">
-                        <label for="quantity" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="99" style="width: 100px;">
+
+            <!-- Product Info -->
+            <div class="col-lg-6">
+                <div class="ps-lg-4">
+                    <!-- Category Tag -->
+                    <div th:if="${product.categoryName() != null}" class="mb-3">
+                        <span class="badge bg-light text-muted">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" class="me-1">
+                                <path d="M6 1v3H1V1h5zM1 0a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1H1z"/>
+                            </svg>
+                            <span th:text="${product.categoryName()}">Category</span>
+                        </span>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
-                </form>
+
+                    <!-- Title -->
+                    <h1 class="mb-3" th:text="${product.name()}">Product Name</h1>
+
+                    <!-- SKU -->
+                    <p class="text-muted mb-3">
+                        <small>SKU: <span th:text="${product.sku()}">SKU123</span></small>
+                    </p>
+
+                    <!-- Price -->
+                    <div class="mb-4">
+                        <span class="fs-2 fw-bold text-primary" th:text="${#numbers.formatDecimal(product.price(), 1, 2)}">0.00</span>
+                        <span class="fs-4 text-muted" th:text="${product.currency()}">USD</span>
+                    </div>
+
+                    <!-- Stock Status -->
+                    <div class="mb-4">
+                        <span th:if="${stockAvailable > 0}" class="d-inline-flex align-items-center text-success fw-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                            </svg>
+                            <span th:text="${stockAvailable} + ' in stock'">In stock</span>
+                        </span>
+                        <span th:if="${stockAvailable == 0}" class="d-inline-flex align-items-center text-danger fw-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                            Out of Stock
+                        </span>
+                    </div>
+
+                    <!-- Description -->
+                    <div th:if="${product.description() != null}" class="mb-4">
+                        <h5 class="mb-2">Description</h5>
+                        <p class="text-muted" th:text="${product.description()}">Product description goes here.</p>
+                    </div>
+
+                    <!-- Add to Cart Form -->
+                    <form th:action="@{/cart/add}" method="post" class="mb-4">
+                        <input type="hidden" name="productId" th:value="${product.id()}">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-auto">
+                                <label for="quantity" class="form-label fw-medium">Quantity</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="99" style="width: 100px;">
+                            </div>
+                            <div class="col">
+                                <button type="submit" class="btn btn-primary btn-lg" th:disabled="${stockAvailable == 0}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                        <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                    </svg>
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Additional Info -->
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="text-muted me-2">
+                                    <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5v-7zm1.294 7.456A1.999 1.999 0 0 1 4.732 11h5.536a2.01 2.01 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456zM12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.336l-1.232-1.54a.5.5 0 0 0-.39-.188H12v3zm-2-1h1V6h-1v3zm-2 0h1V6H9v3z"/>
+                                </svg>
+                                <span class="text-muted small">Free shipping on orders over $50</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="text-muted me-2">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                </svg>
+                                <span class="text-muted small">30-day return policy</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -25,7 +25,10 @@ public class CartMergeAuthenticationSuccessHandler implements AuthenticationSucc
     
     public CartMergeAuthenticationSuccessHandler(MergeCartUseCase mergeCartUseCase) {
         this.mergeCartUseCase = mergeCartUseCase;
-        this.delegate = new SavedRequestAwareAuthenticationSuccessHandler();
+        SavedRequestAwareAuthenticationSuccessHandler savedRequestHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+        savedRequestHandler.setDefaultTargetUrl("/products");
+        savedRequestHandler.setAlwaysUseDefaultTargetUrl(false);
+        this.delegate = savedRequestHandler;
     }
     
     @Override

@@ -1,68 +1,135 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/main :: layout(~{::title}, ~{::main})}">
 <head>
-    <title>Order Confirmation</title>
+    <title>Order Confirmation - Simple Shop</title>
 </head>
 <body>
 <main>
     <div class="container py-5">
+        <!-- Success Header -->
         <div class="text-center mb-5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="text-success mb-3" viewBox="0 0 16 16">
-                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-            </svg>
-            <h1 class="text-success">Order Placed Successfully!</h1>
-            <p class="text-muted fs-5">Thank you for your order.</p>
-        </div>
-        
-        <div class="card mx-auto" style="max-width: 600px;">
-            <div class="card-header">
-                <h5 class="mb-0">Order Details</h5>
+            <div class="mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor" class="text-success" viewBox="0 0 16 16">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                </svg>
             </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-sm-4 text-muted">Order Number:</div>
-                    <div class="col-sm-8 fw-bold" th:text="${order.orderNumber}">ORD-2024-00001</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 text-muted">Status:</div>
-                    <div class="col-sm-8">
-                        <span class="badge bg-warning" th:text="${order.status}">PENDING</span>
+            <h1 class="text-success mb-3">Order Confirmed!</h1>
+            <p class="text-muted fs-5">Thank you for your order. We've sent a confirmation email.</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Order Details Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Order Details</h5>
                     </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 text-muted">Order Date:</div>
-                    <div class="col-sm-8" th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</div>
-                </div>
-                <hr>
-                <div class="row mb-3">
-                    <div class="col-sm-4 text-muted">Shipping To:</div>
-                    <div class="col-sm-8">
-                        <span th:text="${order.shippingStreet}">Street</span><br>
-                        <span th:text="${order.shippingCity} + ', ' + ${order.shippingPostalCode}">City, Postal</span><br>
-                        <span th:text="${order.shippingCountry}">Country</span>
-                    </div>
-                </div>
-                <hr>
-                <h6 class="mb-3">Items</h6>
-                <ul class="list-group list-group-flush mb-3">
-                    <li class="list-group-item d-flex justify-content-between" th:each="item : ${order.items}">
-                        <div>
-                            <span th:text="${item.productName}">Product</span>
-                            <small class="text-muted d-block" th:text="'Qty: ' + ${item.quantity} + ' × ' + ${#numbers.formatDecimal(item.unitPrice, 1, 2)} + ' ' + ${item.currency}">Qty: 1 × 0.00 USD</small>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <p class="text-muted small mb-1">Order Number</p>
+                                <p class="fs-5 fw-bold text-primary mb-0" th:text="${order.orderNumber}">ORD-2024-00001</p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <p class="text-muted small mb-1">Order Date</p>
+                                <p class="mb-0" th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</p>
+                            </div>
                         </div>
-                        <span th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)} + ' ' + ${item.currency}">0.00 USD</span>
-                    </li>
-                </ul>
-                <div class="d-flex justify-content-between fw-bold fs-5">
-                    <span>Total:</span>
-                    <span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' ' + ${order.currency}">0.00 USD</span>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <p class="text-muted small mb-1">Status</p>
+                                <span class="badge bg-warning fs-6" th:text="${order.status}">PENDING</span>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <p class="text-muted small mb-1">Total Amount</p>
+                                <p class="fs-5 fw-bold text-primary mb-0" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' ' + ${order.currency}">$0.00</p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Shipping Address -->
+                        <div class="mb-4">
+                            <p class="text-muted small mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="me-1">
+                                    <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                                </svg>
+                                Shipping To
+                            </p>
+                            <address class="mb-0">
+                                <span th:text="${order.shippingStreet}">Street</span><br>
+                                <span th:text="${order.shippingCity} + ', ' + ${order.shippingPostalCode}">City, Postal</span><br>
+                                <span th:text="${order.shippingCountry}">Country</span>
+                            </address>
+                        </div>
+
+                        <hr>
+
+                        <!-- Order Items -->
+                        <h6 class="mb-3">Items Ordered</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-center">Qty</th>
+                                        <th class="text-end">Price</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="item : ${order.items}">
+                                        <td th:text="${item.productName}">Product</td>
+                                        <td class="text-center" th:text="${item.quantity}">1</td>
+                                        <td class="text-end" th:text="${#numbers.formatDecimal(item.unitPrice, 1, 2)} + ' ' + ${item.currency}">$0.00</td>
+                                        <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)} + ' ' + ${item.currency}">$0.00</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-bold">Order Total:</td>
+                                        <td class="text-end fw-bold fs-5 text-primary" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' ' + ${order.currency}">$0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="text-center">
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a th:href="@{/orders}" class="btn btn-primary btn-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                            </svg>
+                            View All Orders
+                        </a>
+                        <a th:href="@{/products}" class="btn btn-outline-secondary btn-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5z"/>
+                            </svg>
+                            Continue Shopping
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="card mt-4 bg-light border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="text-muted me-3 flex-shrink-0" viewBox="0 0 16 16">
+                                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                            </svg>
+                            <div>
+                                <h6 class="mb-1">Track Your Order</h6>
+                                <p class="text-muted mb-0">You'll receive an email with tracking information once your order ships. You can also track your order anytime from the <a th:href="@{/shipments/track}">Track Order</a> page.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="text-center mt-4">
-            <a th:href="@{/orders}" class="btn btn-primary me-2">View All Orders</a>
-            <a th:href="@{/products}" class="btn btn-outline-secondary">Continue Shopping</a>
         </div>
     </div>
 </main>

@@ -1,108 +1,187 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/main :: layout(~{::title}, ~{::main})}">
 <head>
-    <title>Order Details</title>
+    <title>Order Details - Simple Shop</title>
 </head>
 <body>
 <main>
-    <div class="container py-4">
+    <div class="container py-5">
+        <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a th:href="@{/orders}">My Orders</a></li>
                 <li class="breadcrumb-item active" th:text="${order.orderNumber}">ORD-2024-00001</li>
             </ol>
         </nav>
-        
+
+        <!-- Alerts -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-        
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 th:text="'Order ' + ${order.orderNumber}">Order ORD-2024-00001</h1>
+
+        <!-- Header -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div>
+                <h1 class="mb-2" th:text="'Order ' + ${order.orderNumber}">Order ORD-2024-00001</h1>
+                <p class="text-muted mb-0" th:text="'Placed on ' + ${#temporals.format(order.createdAt, 'MMMM dd, yyyy')}">Placed on January 01, 2024</p>
+            </div>
             <span class="badge fs-6"
-                  th:classappend="${order.status == 'DELIVERED' ? 'bg-success' : 
-                                   (order.status == 'CANCELLED' ? 'bg-danger' : 
+                  th:classappend="${order.status == 'DELIVERED' ? 'bg-success' :
+                                   (order.status == 'CANCELLED' ? 'bg-danger' :
                                    (order.status == 'SHIPPED' ? 'bg-info' : 'bg-warning'))}"
                   th:text="${order.status}">PENDING</span>
         </div>
-        
-        <div class="row">
-            <div class="col-md-8">
+
+        <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Order Items -->
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="mb-0">Order Items</h5>
                     </div>
-                    <div class="card-body p-0">
-                        <table class="table table-borderless mb-0">
-                            <thead class="table-light">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
                                 <tr>
                                     <th>Product</th>
                                     <th class="text-center">Quantity</th>
-                                    <th class="text-end">Unit Price</th>
-                                    <th class="text-end">Subtotal</th>
+                                    <th class="text-end">Price</th>
+                                    <th class="text-end">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr th:each="item : ${order.items}">
                                     <td th:text="${item.productName}">Product Name</td>
                                     <td class="text-center" th:text="${item.quantity}">1</td>
-                                    <td class="text-end" th:text="${#numbers.formatDecimal(item.unitPrice, 1, 2)} + ' ' + ${item.currency}">0.00 USD</td>
-                                    <td class="text-end" th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)} + ' ' + ${item.currency}">0.00 USD</td>
+                                    <td class="text-end" th:text="${#numbers.formatDecimal(item.unitPrice, 1, 2)} + ' ' + ${item.currency}">$0.00</td>
+                                    <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)} + ' ' + ${item.currency}">$0.00</td>
                                 </tr>
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
-                                    <td colspan="3" class="text-end fw-bold">Total:</td>
-                                    <td class="text-end fw-bold fs-5" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' ' + ${order.currency}">0.00 USD</td>
+                                    <td colspan="3" class="text-end fw-bold">Order Total:</td>
+                                    <td class="text-end fw-bold fs-5 text-primary" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' ' + ${order.currency}">$0.00</td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
                 </div>
-                
-                <div class="card" th:if="${order.status == 'PENDING' or order.status == 'CONFIRMED' or order.status == 'PROCESSING'}">
+
+                <!-- Cancel Order -->
+                <div class="card mb-4" th:if="${order.status == 'PENDING' or order.status == 'CONFIRMED' or order.status == 'PROCESSING'}">
                     <div class="card-body">
-                        <h6 class="text-muted mb-3">Order Actions</h6>
+                        <h6 class="text-muted mb-3">Need to cancel?</h6>
                         <form th:action="@{/orders/{id}/cancel(id=${order.id})}" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-outline-danger" 
+                            <button type="submit" class="btn btn-outline-danger"
                                     onclick="return confirm('Are you sure you want to cancel this order?')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                </svg>
                                 Cancel Order
                             </button>
                         </form>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card mb-4">
+
+                <!-- Shipment Tracking -->
+                <div class="card" th:if="${shipments != null and !shipments.isEmpty()}">
                     <div class="card-header">
-                        <h5 class="mb-0">Order Information</h5>
+                        <h5 class="mb-0">Shipment Tracking</h5>
                     </div>
                     <div class="card-body">
-                        <dl class="row mb-0">
-                            <dt class="col-sm-5 text-muted">Order Date:</dt>
-                            <dd class="col-sm-7" th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</dd>
-                            
-                            <dt class="col-sm-5 text-muted" th:if="${order.paidAt}">Paid At:</dt>
-                            <dd class="col-sm-7" th:if="${order.paidAt}" th:text="${#temporals.format(order.paidAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</dd>
-                            
-                            <dt class="col-sm-5 text-muted" th:if="${order.shippedAt}">Shipped At:</dt>
-                            <dd class="col-sm-7" th:if="${order.shippedAt}" th:text="${#temporals.format(order.shippedAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</dd>
-                            
-                            <dt class="col-sm-5 text-muted" th:if="${order.deliveredAt}">Delivered At:</dt>
-                            <dd class="col-sm-7" th:if="${order.deliveredAt}" th:text="${#temporals.format(order.deliveredAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</dd>
-                            
-                            <dt class="col-sm-5 text-muted" th:if="${order.cancelledAt}">Cancelled At:</dt>
-                            <dd class="col-sm-7" th:if="${order.cancelledAt}" th:text="${#temporals.format(order.cancelledAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</dd>
-                            
-                            <dt class="col-sm-5 text-muted" th:if="${order.cancellationReason}">Reason:</dt>
-                            <dd class="col-sm-7" th:if="${order.cancellationReason}" th:text="${order.cancellationReason}">Cancelled</dd>
-                        </dl>
+                        <div th:each="shipment : ${shipments}" class="mb-4 pb-4 border-bottom" th:classappend="${!shipmentStat.last} ? 'border-bottom' : ''">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                                <div>
+                                    <span class="fw-bold text-primary" th:text="${shipment.trackingNumber}">SHIP-2025-00001</span>
+                                    <span class="badge ms-2"
+                                          th:classappend="${shipment.status.name() == 'DELIVERED' ? 'bg-success' :
+                                                           (shipment.status.name() == 'FAILED' ? 'bg-danger' :
+                                                           (shipment.status.name() == 'OUT_FOR_DELIVERY' ? 'bg-warning' :
+                                                           (shipment.status.name() == 'SHIPPED' or shipment.status.name() == 'IN_TRANSIT' ? 'bg-info' : 'bg-secondary')))}"
+                                          th:text="${shipment.status.displayName}">Status</span>
+                                </div>
+                                <a th:href="@{/shipments/track/{num}(num=${shipment.trackingNumber})}" class="btn btn-sm btn-outline-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                        <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                                    </svg>
+                                    Track Package
+                                </a>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6" th:if="${shipment.destinationCity}">
+                                    <small class="text-muted">Destination</small>
+                                    <p class="mb-0 fw-medium" th:text="${shipment.destinationCity} + ', ' + ${shipment.destinationCountry}">City, Country</p>
+                                </div>
+                                <div class="col-md-6" th:if="${shipment.estimatedDelivery}">
+                                    <small class="text-muted">Estimated Delivery</small>
+                                    <p class="mb-0 fw-medium" th:text="${#temporals.format(shipment.estimatedDelivery, 'MMM dd, yyyy')}">Jan 30, 2025</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                <!-- Order Timeline -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Order Timeline</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item completed">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Order Placed</h6>
+                                    <p class="text-muted small mb-0" th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item" th:if="${order.paidAt}" th:classappend="${order.paidAt} ? 'completed' : ''">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Confirmed</h6>
+                                    <p class="text-muted small mb-0" th:text="${#temporals.format(order.paidAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item" th:if="${order.shippedAt}" th:classappend="${order.shippedAt} ? 'completed' : ''">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Shipped</h6>
+                                    <p class="text-muted small mb-0" th:text="${#temporals.format(order.shippedAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item" th:if="${order.deliveredAt}" th:classappend="${order.deliveredAt} ? 'completed' : ''">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Delivered</h6>
+                                    <p class="text-muted small mb-0" th:text="${#temporals.format(order.deliveredAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item" th:if="${order.cancelledAt}">
+                                <div class="timeline-marker bg-danger"></div>
+                                <div class="timeline-content border-danger">
+                                    <h6 class="mb-1 text-danger">Cancelled</h6>
+                                    <p class="text-muted small mb-0" th:text="${#temporals.format(order.cancelledAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 12:00</p>
+                                    <p class="text-danger small mb-0" th:if="${order.cancellationReason}" th:text="${order.cancellationReason}">Reason</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Address -->
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0">Shipping Address</h5>
+                        <h5 class="mb-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                            </svg>
+                            Shipping Address
+                        </h5>
                     </div>
                     <div class="card-body">
                         <address class="mb-0">
@@ -114,49 +193,15 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Shipment Tracking Section -->
-        <div class="row mt-4" th:if="${shipments != null and !shipments.isEmpty()}">
-            <div class="col-12">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">Shipment Tracking</h5>
-                    </div>
-                    <div class="card-body">
-                        <div th:each="shipment : ${shipments}" class="mb-4 pb-4 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div>
-                                    <strong class="text-primary" th:text="${shipment.trackingNumber}">SHIP-2025-00001</strong>
-                                    <span class="badge ms-2"
-                                          th:classappend="${shipment.status.name() == 'DELIVERED' ? 'bg-success' :
-                                                           (shipment.status.name() == 'FAILED' ? 'bg-danger' :
-                                                           (shipment.status.name() == 'OUT_FOR_DELIVERY' ? 'bg-warning' :
-                                                           (shipment.status.name() == 'SHIPPED' or shipment.status.name() == 'IN_TRANSIT' ? 'bg-info' : 'bg-secondary')))}"
-                                          th:text="${shipment.status.displayName}">Status</span>
-                                </div>
-                                <a th:href="@{/shipments/track/{num}(num=${shipment.trackingNumber})}" class="btn btn-sm btn-outline-primary">
-                                    Track Package
-                                </a>
-                            </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <small class="text-muted">Destination:</small>
-                                    <p class="mb-0" th:text="${shipment.destinationCity} + ', ' + ${shipment.destinationCountry}">City, Country</p>
-                                </div>
-                                <div class="col-md-6" th:if="${shipment.estimatedDelivery}">
-                                    <small class="text-muted">Estimated Delivery:</small>
-                                    <p class="mb-0" th:text="${#temporals.format(shipment.estimatedDelivery, 'MMM dd, yyyy')}">Jan 30, 2025</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <!-- Back Button -->
         <div class="mt-4">
-            <a th:href="@{/orders}" class="btn btn-outline-secondary">Back to Orders</a>
+            <a th:href="@{/orders}" class="btn btn-outline-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                </svg>
+                Back to Orders
+            </a>
         </div>
     </div>
 </main>

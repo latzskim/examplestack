@@ -5,53 +5,120 @@
 </head>
 <body>
 <main>
-    <div class="container-fluid py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Inventory</h1>
-            <a th:href="@{/admin/warehouses}" class="btn btn-outline-primary">Manage Warehouses</a>
+    <div th:with="pageTitle='Inventory'">
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="text-white-50 small mb-1">In Stock</p>
+                                <h3 class="mb-0">-</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="opacity-50" viewBox="0 0 16 16">
+                                    <path d="M2.5 3.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm2-2a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7zM0 13a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 16 13V6a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 0 6v7zm1.5.5a.5.5 0 0 1-.5-.5V6a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-13z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 bg-warning text-dark">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="text-dark-50 small mb-1">Low Stock</p>
+                                <h3 class="mb-0">-</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="opacity-50" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 bg-danger text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="text-white-50 small mb-1">Out of Stock</p>
+                                <h3 class="mb-0">-</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="opacity-50" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        
+
+        <!-- Success Alert -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-        
+
+        <!-- Inventory Table -->
         <div class="card">
-            <div class="card-body">
-                <table class="table table-hover">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
                     <thead>
                         <tr>
                             <th>Product</th>
                             <th>SKU</th>
-                            <th>Available Stock</th>
-                            <th>Reserved</th>
-                            <th>Actions</th>
+                            <th class="text-center">Available</th>
+                            <th class="text-center">Reserved</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="info : ${productStocks}">
-                            <td th:text="${info.product().name()}">Product Name</td>
-                            <td th:text="${info.product().sku()}">SKU</td>
                             <td>
-                                <span th:if="${info.available() == 0}" class="text-danger fw-bold">Out of Stock</span>
-                                <span th:if="${info.available() > 0 && info.available() <= 10}" class="text-warning fw-bold" th:text="${info.available()}">0</span>
-                                <span th:if="${info.available() > 10}" class="text-success" th:text="${info.available()}">0</span>
+                                <span class="fw-medium" th:text="${info.product().name()}">Product Name</span>
                             </td>
-                            <td th:text="${info.reserved()}">0</td>
                             <td>
+                                <code th:text="${info.product().sku()}">SKU</code>
+                            </td>
+                            <td class="text-center">
+                                <span th:if="${info.available() == 0}" class="badge bg-danger">Out of Stock</span>
+                                <span th:if="${info.available() > 0 && info.available() <= 10}" class="badge bg-warning text-dark" th:text="${info.available()}">0</span>
+                                <span th:if="${info.available() > 10}" class="badge bg-success" th:text="${info.available()}">0</span>
+                            </td>
+                            <td class="text-center" th:text="${info.reserved()}">0</td>
+                            <td class="text-end">
                                 <a th:href="@{/admin/inventory/products/{id}(id=${info.product().id()})}" class="btn btn-sm btn-outline-primary">Manage Stock</a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                
-                <div th:if="${products.empty}" class="text-center py-4">
-                    <p class="text-muted">No products found. <a th:href="@{/admin/products/new}">Create a product first</a>.</p>
-                </div>
-                
-                <nav th:if="${products.totalPages > 1}" aria-label="Pagination">
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${products.empty}" class="card-body text-center py-5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="text-muted mb-3" viewBox="0 0 16 16">
+                    <path d="M2.5 3.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm2-2a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7zM0 13a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 16 13V6a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 0 6v7zm1.5.5a.5.5 0 0 1-.5-.5V6a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-13z"/>
+                </svg>
+                <h6>No products found</h6>
+                <p class="text-muted mb-0">Create products first to manage inventory.</p>
+                <a th:href="@{/admin/products/new}" class="btn btn-primary mt-3">Add Product</a>
+            </div>
+
+            <!-- Pagination -->
+            <div class="card-footer bg-white" th:if="${products.totalPages > 1}">
+                <nav>
                     <ul class="pagination justify-content-center mb-0">
                         <li class="page-item" th:classappend="${products.first} ? 'disabled'">
                             <a class="page-link" th:href="@{/admin/inventory(page=${products.number - 1})}">Previous</a>
                         </li>
-                        <li th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}" 
+                        <li th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}"
                             class="page-item" th:classappend="${i == products.number} ? 'active'">
                             <a class="page-link" th:href="@{/admin/inventory(page=${i})}" th:text="${i + 1}">1</a>
                         </li>

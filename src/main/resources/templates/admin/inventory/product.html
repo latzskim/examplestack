@@ -5,80 +5,115 @@
 </head>
 <body>
 <main>
-    <div class="container-fluid py-4">
-        <nav aria-label="breadcrumb">
+    <div th:with="pageTitle='Stock Management'">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a th:href="@{/admin/inventory}">Inventory</a></li>
                 <li class="breadcrumb-item active" th:text="${product.name()}">Product</li>
             </ol>
         </nav>
-        
+
+        <!-- Success Alert -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-        
-        <div class="row">
-            <div class="col-md-8">
+
+        <div class="row g-4">
+            <!-- Product Info & Stock Overview -->
+            <div class="col-lg-8">
+                <!-- Stats Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-success text-white">
+                            <div class="card-body text-center">
+                                <h3 class="mb-1" th:text="${totalAvailability.totalAvailable()}">0</h3>
+                                <p class="text-white-50 small mb-0">Total Available</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-warning text-dark">
+                            <div class="card-body text-center">
+                                <h3 class="mb-1" th:text="${totalAvailability.totalReserved()}">0</h3>
+                                <p class="text-dark-50 small mb-0">Reserved</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h3 class="mb-1" th:text="${totalAvailability.totalAvailable() + totalAvailability.totalReserved()}">0</h3>
+                                <p class="text-white-50 small mb-0">Total Quantity</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Info -->
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0" th:text="${product.name()}">Product Name</h5>
-                        <span class="text-muted" th:text="'SKU: ' + ${product.sku()}">SKU</span>
+                        <span class="text-muted small" th:text="'SKU: ' + ${product.sku()}">SKU</span>
                     </div>
-                    <div class="card-body">
-                        <div class="row text-center mb-4">
-                            <div class="col-md-4">
-                                <h3 class="text-success" th:text="${totalAvailability.totalAvailable()}">0</h3>
-                                <p class="text-muted mb-0">Total Available</p>
-                            </div>
-                            <div class="col-md-4">
-                                <h3 class="text-warning" th:text="${totalAvailability.totalReserved()}">0</h3>
-                                <p class="text-muted mb-0">Reserved</p>
-                            </div>
-                            <div class="col-md-4">
-                                <h3 th:text="${totalAvailability.totalAvailable() + totalAvailability.totalReserved()}">0</h3>
-                                <p class="text-muted mb-0">Total Quantity</p>
-                            </div>
-                        </div>
-                        
-                        <h6>Stock by Warehouse</h6>
-                        <table class="table">
+                </div>
+
+                <!-- Stock by Warehouse -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Stock by Warehouse</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
                             <thead>
                                 <tr>
                                     <th>Warehouse</th>
-                                    <th>Quantity</th>
-                                    <th>Reserved</th>
-                                    <th>Available</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-center">Reserved</th>
+                                    <th class="text-center">Available</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr th:each="stock : ${stocks}">
                                     <td>
-                                        <span th:each="wh : ${warehouses}" th:if="${wh.id() == stock.warehouseId()}" th:text="${wh.name()}">Warehouse</span>
+                                        <span th:each="wh : ${warehouses}" th:if="${wh.id() == stock.warehouseId()}" th:text="${wh.name()}" class="fw-medium">Warehouse</span>
                                     </td>
-                                    <td th:text="${stock.quantity()}">0</td>
-                                    <td th:text="${stock.reservedQuantity()}">0</td>
-                                    <td>
-                                        <strong th:text="${stock.availableQuantity()}">0</strong>
+                                    <td class="text-center" th:text="${stock.quantity()}">0</td>
+                                    <td class="text-center">
+                                        <span th:if="${stock.reservedQuantity() > 0}" class="text-warning" th:text="${stock.reservedQuantity()}">0</span>
+                                        <span th:unless="${stock.reservedQuantity() > 0}" class="text-muted">0</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge" th:classappend="${stock.availableQuantity() == 0} ? 'bg-danger' : (${stock.availableQuantity() <= 10} ? 'bg-warning text-dark' : 'bg-success')" th:text="${stock.availableQuantity()}">0</span>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
-                        
-                        <div th:if="${#lists.isEmpty(stocks)}" class="text-center py-3">
-                            <p class="text-muted mb-0">No stock entries yet. Add stock using the form.</p>
-                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div th:if="${#lists.isEmpty(stocks)}" class="card-body text-center py-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="text-muted mb-3" viewBox="0 0 16 16">
+                            <path d="M2.5 3.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm2-2a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7zM0 13a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 16 13V6a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 0 6v7zm1.5.5a.5.5 0 0 1-.5-.5V6a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-13z"/>
+                        </svg>
+                        <h6>No stock entries</h6>
+                        <p class="text-muted mb-0">Add stock using the form on the right.</p>
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-4">
+
+            <!-- Add Stock Form -->
+            <div class="col-lg-4">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0">Add/Replenish Stock</h5>
+                        <h5 class="mb-0">Add / Replenish Stock</h5>
                     </div>
                     <div class="card-body">
                         <div th:if="${#lists.isEmpty(warehouses)}" class="alert alert-warning">
-                            <p class="mb-0">No warehouses available. <a th:href="@{/admin/warehouses/new}">Create a warehouse first</a>.</p>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                            </svg>
+                            No warehouses available. <a th:href="@{/admin/warehouses/new}" class="alert-link">Create a warehouse first</a>.
                         </div>
-                        
+
                         <form th:unless="${#lists.isEmpty(warehouses)}" th:action="@{/admin/inventory/products/{id}/replenish(id=${product.id()})}" method="post">
                             <div class="mb-3">
                                 <label for="warehouseId" class="form-label">Warehouse *</label>
@@ -87,13 +122,18 @@
                                     <option th:each="wh : ${warehouses}" th:value="${wh.id()}" th:text="${wh.name()}">Warehouse</option>
                                 </select>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="quantity" class="form-label">Quantity to Add *</label>
                                 <input type="number" class="form-control" id="quantity" name="quantity" required min="1" value="1">
                             </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100">Add Stock</button>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                </svg>
+                                Add Stock
+                            </button>
                         </form>
                     </div>
                 </div>

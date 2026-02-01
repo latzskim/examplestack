@@ -5,52 +5,68 @@
 </head>
 <body>
 <main>
-    <div class="container-fluid py-4">
-        <nav aria-label="breadcrumb">
+    <div th:with="pageTitle=${warehouse.name()}">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a th:href="@{/admin/warehouses}">Warehouses</a></li>
                 <li class="breadcrumb-item active" th:text="${warehouse.name()}">Warehouse</li>
             </ol>
         </nav>
-        
+
+        <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h1 th:text="${warehouse.name()}">Warehouse Name</h1>
-                <p class="text-muted mb-0" th:text="${warehouse.street() + ', ' + warehouse.city() + ' ' + warehouse.postalCode() + ', ' + warehouse.country()}">Address</p>
+                <h1 class="mb-2" th:text="${warehouse.name()}">Warehouse Name</h1>
+                <p class="text-muted mb-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="me-1">
+                        <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                    </svg>
+                    <span th:text="${warehouse.street() + ', ' + warehouse.city() + ' ' + warehouse.postalCode() + ', ' + warehouse.country()}">Address</span>
+                </p>
             </div>
         </div>
-        
+
+        <!-- Stock Table -->
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">Stock in this Warehouse</h5>
             </div>
-            <div class="card-body">
-                <table class="table table-hover">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
                     <thead>
                         <tr>
                             <th>Product ID</th>
-                            <th>Quantity</th>
-                            <th>Reserved</th>
-                            <th>Available</th>
+                            <th class="text-center">Total Quantity</th>
+                            <th class="text-center">Reserved</th>
+                            <th class="text-center">Available</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="stock : ${stocks.content}">
                             <td>
-                                <a th:href="@{/admin/inventory/products/{id}(id=${stock.productId()})}" th:text="${stock.productId()}">Product ID</a>
+                                <a th:href="@{/admin/inventory/products/{id}(id=${stock.productId()})}" th:text="${stock.productId()}" class="fw-medium text-decoration-none">Product ID</a>
                             </td>
-                            <td th:text="${stock.quantity()}">0</td>
-                            <td th:text="${stock.reservedQuantity()}">0</td>
-                            <td>
-                                <strong th:text="${stock.availableQuantity()}">0</strong>
+                            <td class="text-center" th:text="${stock.quantity()}">0</td>
+                            <td class="text-center">
+                                <span th:if="${stock.reservedQuantity() > 0}" class="text-warning" th:text="${stock.reservedQuantity()}">0</span>
+                                <span th:unless="${stock.reservedQuantity() > 0}" class="text-muted">0</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge" th:classappend="${stock.availableQuantity() == 0} ? 'bg-danger' : (${stock.availableQuantity() <= 10} ? 'bg-warning text-dark' : 'bg-success')" th:text="${stock.availableQuantity()}">0</span>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                
-                <div th:if="${stocks.empty}" class="text-center py-4">
-                    <p class="text-muted">No stock in this warehouse yet.</p>
-                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${stocks.empty}" class="card-body text-center py-5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="text-muted mb-3" viewBox="0 0 16 16">
+                    <path d="M2.5 3.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm2-2a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7zM0 13a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 16 13V6a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 0 6v7zm1.5.5a.5.5 0 0 1-.5-.5V6a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-13z"/>
+                </svg>
+                <h6>No stock in this warehouse</h6>
+                <p class="text-muted mb-0">Stock will appear here when products are added to this warehouse.</p>
             </div>
         </div>
     </div>

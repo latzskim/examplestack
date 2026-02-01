@@ -3,46 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Order Has Shipped!</title>
+    <title th:text="${currentStatus} + ' - Your Shipment Update'">Shipment Update</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #5a5a5a;
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #fafafa;
         }
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3d4852 0%, #2c353a 100%);
             color: white;
             padding: 30px;
             text-align: center;
-            border-radius: 5px 5px 0 0;
+            border-radius: 8px 8px 0 0;
         }
         .header h1 {
             margin: 0;
-            font-size: 2em;
+            font-size: 1.75em;
+            font-weight: 600;
+            letter-spacing: -0.02em;
         }
         .header p {
             margin: 10px 0 0 0;
-            font-size: 1.2em;
+            font-size: 1em;
+            opacity: 0.9;
         }
         .content {
-            background-color: #f9f9f9;
+            background-color: #ffffff;
             padding: 30px;
-            border: 1px solid #ddd;
+            border: 1px solid #e8e8e8;
             border-top: none;
+            border-radius: 0 0 8px 8px;
         }
         .greeting {
             margin-bottom: 20px;
         }
         .highlight-box {
-            background-color: #FFF9C4;
+            background-color: #e8f4f8;
             padding: 20px;
             border-radius: 5px;
             margin: 20px 0;
-            border-left: 4px solid #FBC02D;
+            border-left: 4px solid #5a7a8a;
         }
         
         /* Timeline Styles */
@@ -87,11 +92,11 @@
             border: 2px solid white;
         }
         .timeline-item.completed::before {
-            background-color: #4CAF50;
+            background-color: #5a7d5a;
         }
         .timeline-item.current::before {
-            background-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+            background-color: #5a7a8a;
+            box-shadow: 0 0 0 3px rgba(90, 122, 138, 0.3);
         }
         .timeline-item.pending::before {
             background-color: #ddd;
@@ -101,17 +106,17 @@
             color: #333;
         }
         .timeline-item.completed .timeline-status {
-            color: #4CAF50;
+            color: #5a7d5a;
         }
         .timeline-item.current .timeline-status {
-            color: #667eea;
+            color: #5a7a8a;
         }
         .timeline-item.pending .timeline-status {
             color: #999;
         }
         
         .tracking-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3d4852 0%, #5a6670 100%);
             color: white;
             padding: 30px;
             text-align: center;
@@ -138,7 +143,7 @@
         .button {
             display: inline-block;
             background-color: white;
-            color: #667eea;
+            color: #3d4852;
             padding: 15px 40px;
             text-decoration: none;
             border-radius: 30px;
@@ -155,7 +160,7 @@
         }
         .details h3 {
             margin-top: 0;
-            color: #667eea;
+            color: #3d4852;
         }
         .footer {
             text-align: center;
@@ -174,9 +179,30 @@
     </style>
 </head>
 <body>
+    <!-- Header based on status -->
     <div class="header">
-        <h1>🚚 It's on the way!</h1>
-        <p>Your order has been shipped</p>
+        <div th:switch="${currentStatus}">
+            <div th:case="'Created'">
+                <h1>📦 Shipment Created!</h1>
+                <p>Your order is being prepared for shipment</p>
+            </div>
+            <div th:case="'Picked'">
+                <h1>📦 Items Picked!</h1>
+                <p>Your items have been picked from the warehouse</p>
+            </div>
+            <div th:case="'Packed'">
+                <h1>📦 Order Packed!</h1>
+                <p>Your order has been packed and is ready to ship</p>
+            </div>
+            <div th:case="'Shipped'">
+                <h1>🚚 It's on the way!</h1>
+                <p>Your order has been shipped</p>
+            </div>
+            <div th:case="*">
+                <h1>📦 Shipment Update</h1>
+                <p th:text="${currentStatus}">Status Update</p>
+            </div>
+        </div>
     </div>
     
     <div class="content">
@@ -185,38 +211,73 @@
         </div>
         
         <div class="highlight-box">
-            <strong>Great news!</strong> Your order has been packed and shipped. It's now on its way to you!
+            <div th:switch="${currentStatus}">
+                <div th:case="'Created'">
+                    <strong>Good news!</strong> Your shipment has been created and our team is preparing your order. You'll receive another email when it ships.
+                </div>
+                <div th:case="'Picked'">
+                    <strong>Progress!</strong> Our team has picked your items from the warehouse. They're now being prepared for packing.
+                </div>
+                <div th:case="'Packed'">
+                    <strong>Almost there!</strong> Your order has been packed securely and is ready to be handed to the carrier.
+                </div>
+                <div th:case="'Shipped'">
+                    <strong>Great news!</strong> Your order has been packed and shipped. It's now on its way to you!
+                </div>
+                <div th:case="*">
+                    <strong>Update!</strong> Your shipment status has been updated to: <span th:text="${currentStatus}">Status</span>
+                </div>
+            </div>
         </div>
         
-        <!-- Shipment Timeline -->
+        <!-- Dynamic Shipment Timeline -->
         <div class="timeline">
             <h3>📦 Shipment Progress</h3>
             <div class="timeline-container">
+                <!-- Order Placed - Always completed -->
                 <div class="timeline-item completed">
                     <div class="timeline-status">Order Placed</div>
                     <div style="font-size: 0.9em; color: #666;">Your order has been received</div>
                 </div>
-                <div class="timeline-item completed">
+                
+                <!-- CREATED -->
+                <div class="timeline-item" th:classappend="${currentStatus} == 'Created' ? 'current' : (${currentStatus} == 'Picked' or ${currentStatus} == 'Packed' or ${currentStatus} == 'Shipped' or ${currentStatus} == 'In Transit' or ${currentStatus} == 'Out for Delivery' or ${currentStatus} == 'Delivered' ? 'completed' : 'pending')">
+                    <div class="timeline-status">Created</div>
+                    <div style="font-size: 0.9em; color: #666;">Shipment record created</div>
+                </div>
+                
+                <!-- PICKED -->
+                <div class="timeline-item" th:classappend="${currentStatus} == 'Picked' ? 'current' : (${currentStatus} == 'Packed' or ${currentStatus} == 'Shipped' or ${currentStatus} == 'In Transit' or ${currentStatus} == 'Out for Delivery' or ${currentStatus} == 'Delivered' ? 'completed' : 'pending')">
                     <div class="timeline-status">Picked</div>
                     <div style="font-size: 0.9em; color: #666;">Items picked from warehouse</div>
                 </div>
-                <div class="timeline-item completed">
+                
+                <!-- PACKED -->
+                <div class="timeline-item" th:classappend="${currentStatus} == 'Packed' ? 'current' : (${currentStatus} == 'Shipped' or ${currentStatus} == 'In Transit' or ${currentStatus} == 'Out for Delivery' or ${currentStatus} == 'Delivered' ? 'completed' : 'pending')">
                     <div class="timeline-status">Packed</div>
                     <div style="font-size: 0.9em; color: #666;">Items packed and ready</div>
                 </div>
-                <div class="timeline-item current">
+                
+                <!-- SHIPPED -->
+                <div class="timeline-item" th:classappend="${currentStatus} == 'Shipped' ? 'current' : (${currentStatus} == 'In Transit' or ${currentStatus} == 'Out for Delivery' or ${currentStatus} == 'Delivered' ? 'completed' : 'pending')">
                     <div class="timeline-status">Shipped</div>
-                    <div style="font-size: 0.9em; color: #666;">Handed to carrier and on the way!</div>
+                    <div style="font-size: 0.9em; color: #666;">Handed to carrier</div>
                 </div>
-                <div class="timeline-item pending">
+                
+                <!-- IN TRANSIT -->
+                <div class="timeline-item" th:classappend="${currentStatus} == 'In Transit' ? 'current' : (${currentStatus} == 'Out for Delivery' or ${currentStatus} == 'Delivered' ? 'completed' : 'pending')">
                     <div class="timeline-status">In Transit</div>
                     <div style="font-size: 0.9em; color: #666;">On the way to destination</div>
                 </div>
-                <div class="timeline-item pending">
-                    <div class="timeline-status">Out For Delivery</div>
+                
+                <!-- OUT FOR DELIVERY -->
+                <div class="timeline-item" th:classappend="${currentStatus} == 'Out for Delivery' ? 'current' : (${currentStatus} == 'Delivered' ? 'completed' : 'pending')">
+                    <div class="timeline-status">Out for Delivery</div>
                     <div style="font-size: 0.9em; color: #666;">Arriving today</div>
                 </div>
-                <div class="timeline-item pending">
+                
+                <!-- DELIVERED -->
+                <div class="timeline-item" th:classappend="${currentStatus == 'Delivered' ? 'current' : 'pending'}">
                     <div class="timeline-status">Delivered</div>
                     <div style="font-size: 0.9em; color: #666;">Package delivered</div>
                 </div>
@@ -233,7 +294,7 @@
         <div class="details">
             <h3>What's Next?</h3>
             <ul>
-                <li>Your package status: <strong th:text="${currentStatus}">Shipped</strong></li>
+                <li>Your package status: <strong th:text="${currentStatus}">Created</strong></li>
                 <li>Expected delivery: <strong th:text="${shipment.estimatedDelivery}">January 15, 2024</strong></li>
                 <li>You'll receive email updates at each milestone</li>
                 <li>You can track your package anytime using the link above</li>
@@ -250,7 +311,7 @@
         <div class="footer">
             <p>Thanks for shopping with Simple Shop!</p>
             <p style="font-size: 0.8em; color: #999;">
-                Track your shipment anytime at <a th:href="${baseUrl}" style="color: #667eea;">simpleshop.com</a>
+                Track your shipment anytime at <a th:href="${baseUrl}" style="color: #3d4852;">simpleshop.com</a>
             </p>
         </div>
     </div>

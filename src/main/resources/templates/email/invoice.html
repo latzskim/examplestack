@@ -6,32 +6,44 @@
     <title>Invoice</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #5a5a5a;
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #fafafa;
         }
         .header {
-            background-color: #FF9800;
+            background: linear-gradient(135deg, #8b7355 0%, #6b5a45 100%);
             color: white;
-            padding: 20px;
+            padding: 30px;
             text-align: center;
-            border-radius: 5px 5px 0 0;
+            border-radius: 8px 8px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.75em;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1em;
+            opacity: 0.9;
         }
         .content {
-            background-color: #f9f9f9;
+            background-color: #ffffff;
             padding: 30px;
-            border: 1px solid #ddd;
+            border: 1px solid #e8e8e8;
             border-top: none;
+            border-radius: 0 0 8px 8px;
         }
         .invoice-details {
-            background-color: white;
-            padding: 20px;
+            background-color: #f5f5f5;
+            padding: 25px;
             margin: 20px 0;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
         }
         .invoice-header {
             display: flex;
@@ -39,68 +51,97 @@
             align-items: flex-start;
             margin-bottom: 30px;
             padding-bottom: 20px;
-            border-bottom: 2px solid #FF9800;
+            border-bottom: 2px solid #e8e8e8;
         }
         .invoice-title {
-            font-size: 2em;
-            color: #FF9800;
+            font-size: 1.75em;
+            color: #8b7355;
             margin: 0;
+            font-weight: 600;
         }
         .invoice-meta {
             text-align: right;
         }
+        .invoice-meta p {
+            margin: 5px 0;
+            color: #7a7a7a;
+        }
+        .invoice-meta strong {
+            color: #3d4852;
+        }
         .items-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             margin: 20px 0;
         }
         .items-table th {
-            background-color: #FF9800;
+            background-color: #8b7355;
             color: white;
             padding: 12px;
             text-align: left;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
         }
         .items-table td {
             padding: 12px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #e8e8e8;
+            color: #5a5a5a;
         }
         .items-table tr:nth-child(even) {
             background-color: #f9f9f9;
+        }
+        .items-table tr:last-child td {
+            border-bottom: none;
         }
         .total-section {
             text-align: right;
             margin-top: 20px;
             padding-top: 20px;
-            border-top: 2px solid #FF9800;
+            border-top: 2px solid #8b7355;
         }
         .total-row {
             font-size: 1.3em;
-            font-weight: bold;
-            color: #FF9800;
+            font-weight: 600;
+            color: #8b7355;
         }
         .button {
             display: inline-block;
-            background-color: #FF9800;
+            background: linear-gradient(135deg, #3d4852 0%, #2c353a 100%);
             color: white;
-            padding: 12px 30px;
+            padding: 14px 32px;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 6px;
+            font-weight: 500;
             margin: 20px 0;
         }
         .footer {
             text-align: center;
             margin-top: 30px;
             padding-top: 20px;
-            border-top: 1px solid #ddd;
-            color: #666;
+            border-top: 1px solid #e8e8e8;
+            color: #7a7a7a;
             font-size: 0.9em;
         }
         .payment-info {
-            background-color: #FFF3E0;
+            background-color: #f5f0e8;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 6px;
             margin: 20px 0;
-            border-left: 4px solid #FF9800;
+            border-left: 3px solid #8b7355;
+        }
+        .payment-info strong {
+            color: #8b7355;
+        }
+        .info-label {
+            color: #7a7a7a;
+            font-size: 0.9em;
+        }
+        .info-value {
+            color: #3d4852;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -115,19 +156,19 @@
             <div class="invoice-header">
                 <div>
                     <h2 class="invoice-title">INVOICE</h2>
-                    <p style="color: #666;">Simple Shop</p>
+                    <p style="color: #7a7a7a; margin: 5px 0;">Simple Shop</p>
                 </div>
                 <div class="invoice-meta">
                     <p><strong>Order Number:</strong></p>
-                    <p th:text="${order.orderNumber}" style="font-size: 1.2em;">ORD-2024-00001</p>
-                    <p><strong>Date:</strong></p>
+                    <p th:text="${order.orderNumber}" style="font-size: 1.1em; color: #3d4852; font-weight: 600;">ORD-2024-00001</p>
+                    <p style="margin-top: 10px;"><strong>Date:</strong></p>
                     <p th:text="${order.createdAt}">2024-01-01</p>
                 </div>
             </div>
             
             <div style="margin-bottom: 30px;">
-                <strong>Bill To:</strong><br>
-                <span th:text="${recipientEmail}">customer@example.com</span>
+                <span class="info-label">Bill To:</span><br>
+                <span class="info-value" th:text="${recipientEmail}">customer@example.com</span>
             </div>
             
             <table class="items-table">
@@ -163,12 +204,12 @@
         </div>
         
         <div style="text-align: center;">
-            <a th:href="${baseUrl != null ? baseUrl + '/orders/' + order.id : '#'}" class="button" style="color: white;">View Order Details</a>
+            <a th:href="${baseUrl != null ? baseUrl + '/orders/' + order.id : '#'}" class="button">View Order Details</a>
         </div>
         
         <div class="footer">
             <p>Thank you for choosing Simple Shop!</p>
-            <p style="font-size: 0.8em;">This is an electronically generated invoice and does not require a signature.</p>
+            <p style="font-size: 0.8em; color: #a8a8a8;">This is an electronically generated invoice and does not require a signature.</p>
         </div>
     </div>
 </body>

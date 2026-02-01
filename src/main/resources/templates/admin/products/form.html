@@ -5,45 +5,55 @@
 </head>
 <body>
 <main>
-    <div class="container py-4">
-        <nav aria-label="breadcrumb">
+    <div th:with="pageTitle=${product != null} ? 'Edit Product' : 'New Product'">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a th:href="@{/admin/products}">Products</a></li>
                 <li class="breadcrumb-item active" th:text="${product != null} ? 'Edit' : 'New'">Form</li>
             </ol>
         </nav>
-        
-        <h1 th:text="${product != null} ? 'Edit Product' : 'New Product'" class="mb-4">Product Form</h1>
-        
+
+        <!-- Form Card -->
         <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0" th:text="${product != null} ? 'Edit Product' : 'Create New Product'">Product Form</h5>
+            </div>
             <div class="card-body">
                 <form th:action="${product != null} ? @{/admin/products/{id}(id=${product.id()})} : @{/admin/products}" method="post">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="name" class="form-label">Name *</label>
-                            <input type="text" class="form-control" id="name" name="name" 
-                                   th:value="${product?.name()}" required maxlength="255">
+                            <label for="name" class="form-label">Product Name *</label>
+                            <input type="text" class="form-control" id="name" name="name"
+                                   th:value="${product?.name()}" required maxlength="255"
+                                   placeholder="Enter product name">
                         </div>
-                        
+
                         <div class="col-md-6 mb-3" th:if="${product == null}">
                             <label for="sku" class="form-label">SKU *</label>
                             <input type="text" class="form-control" id="sku" name="sku" required maxlength="50"
-                                   pattern="[A-Za-z0-9\-_]+" title="Alphanumeric, dashes, and underscores only">
+                                   pattern="[A-Za-z0-9\-_]+" title="Alphanumeric, dashes, and underscores only"
+                                   placeholder="PROD-001">
                         </div>
-                        
+
                         <div class="col-md-6 mb-3" th:if="${product != null}">
                             <label class="form-label">SKU</label>
                             <input type="text" class="form-control" th:value="${product.sku()}" readonly disabled>
+                            <div class="form-text">SKU cannot be changed after creation</div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="price" class="form-label">Price *</label>
-                            <input type="number" class="form-control" id="price" name="price" 
-                                   th:value="${product?.price()}" required min="0" step="0.01">
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="price" name="price"
+                                       th:value="${product?.price()}" required min="0" step="0.01"
+                                       placeholder="0.00">
+                            </div>
                         </div>
-                        
+
                         <div class="col-md-2 mb-3">
                             <label for="currency" class="form-label">Currency</label>
                             <select class="form-select" id="currency" name="currency">
@@ -52,33 +62,40 @@
                                 <option value="GBP" th:selected="${product?.currency() == 'GBP'}">GBP</option>
                             </select>
                         </div>
-                        
+
                         <div class="col-md-6 mb-3">
                             <label for="categoryId" class="form-label">Category</label>
                             <select class="form-select" id="categoryId" name="categoryId">
                                 <option value="">-- No Category --</option>
-                                <option th:each="cat : ${categories}" 
-                                        th:value="${cat.id()}" 
+                                <option th:each="cat : ${categories}"
+                                        th:value="${cat.id()}"
                                         th:text="${cat.name()}"
                                         th:selected="${product?.categoryId() != null && product.categoryId().equals(cat.id())}">Category</option>
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
                         <textarea class="form-control" id="description" name="description" rows="4" maxlength="2000"
-                                  th:text="${product?.description()}"></textarea>
+                                  th:text="${product?.description()}" placeholder="Enter product description..."></textarea>
+                        <div class="form-text">Maximum 2000 characters</div>
                     </div>
-                    
-                    <div class="mb-3">
+
+                    <div class="mb-4">
                         <label for="imageUrl" class="form-label">Image URL</label>
-                        <input type="url" class="form-control" id="imageUrl" name="imageUrl" 
-                               th:value="${product?.imageUrl()}" placeholder="https://example.com/image.jpg">
+                        <input type="url" class="form-control" id="imageUrl" name="imageUrl"
+                               th:value="${product?.imageUrl()}" placeholder="https://example.com/product-image.jpg">
+                        <div class="form-text">Enter a valid URL for the product image</div>
                     </div>
-                    
+
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary" th:text="${product != null} ? 'Update Product' : 'Create Product'">Save</button>
+                        <button type="submit" class="btn btn-primary" th:text="${product != null} ? 'Update Product' : 'Create Product'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5z"/>
+                            </svg>
+                            Save
+                        </button>
                         <a th:href="@{/admin/products}" class="btn btn-outline-secondary">Cancel</a>
                     </div>
                 </form>

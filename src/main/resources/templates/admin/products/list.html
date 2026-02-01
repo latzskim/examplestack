@@ -5,52 +5,77 @@
 </head>
 <body>
 <main>
-    <div class="container-fluid py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Products</h1>
-            <a th:href="@{/admin/products/new}" class="btn btn-primary">Add Product</a>
+    <div th:with="pageTitle='Products'">
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="text-white-50 small mb-1">Total Products</p>
+                                <h3 class="mb-0" th:text="${products.totalElements}">0</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="opacity-50" viewBox="0 0 16 16">
+                                    <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        
+
+        <!-- Success Alert -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-        
+
+        <!-- Products Table -->
         <div class="card">
-            <div class="card-body">
-                <table class="table table-hover">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
                     <thead>
                         <tr>
-                            <th>Image</th>
+                            <th style="width: 80px;">Image</th>
                             <th>Name</th>
                             <th>SKU</th>
-                            <th>Price</th>
-                            <th>Stock</th>
+                            <th class="text-end">Price</th>
+                            <th class="text-center">Stock</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="product : ${products.content}">
-                            <td style="width: 80px;">
+                            <td>
                                 <img th:if="${product.imageUrl() != null}" th:src="${product.imageUrl()}" style="width: 60px; height: 60px; object-fit: cover;" class="rounded">
                                 <div th:if="${product.imageUrl() == null}" class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                    <small class="text-muted">-</small>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="text-muted" viewBox="0 0 16 16">
+                                        <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                        <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                                    </svg>
                                 </div>
                             </td>
-                            <td th:text="${product.name()}">Product Name</td>
-                            <td th:text="${product.sku()}">SKU123</td>
-                            <td th:text="${#numbers.formatDecimal(product.price(), 1, 2)} + ' ' + ${product.currency()}">$0.00</td>
                             <td>
+                                <span class="fw-medium" th:text="${product.name()}">Product Name</span>
+                            </td>
+                            <td>
+                                <code th:text="${product.sku()}">SKU123</code>
+                            </td>
+                            <td class="text-end fw-medium" th:text="${#numbers.formatDecimal(product.price(), 1, 2)} + ' ' + ${product.currency()}">$0.00</td>
+                            <td class="text-center">
                                 <span th:with="stock=${stockMap.get(product.id())}">
-                                    <span th:if="${stock == 0}" class="text-danger fw-bold">0</span>
-                                    <span th:if="${stock > 0 && stock <= 10}" class="text-warning fw-bold" th:text="${stock}">0</span>
-                                    <span th:if="${stock > 10}" class="text-success" th:text="${stock}">0</span>
+                                    <span th:if="${stock == 0}" class="badge bg-danger">0</span>
+                                    <span th:if="${stock > 0 && stock <= 10}" class="badge bg-warning text-dark" th:text="${stock}">0</span>
+                                    <span th:if="${stock > 10}" class="badge bg-success" th:text="${stock}">0</span>
                                 </span>
                             </td>
                             <td>
                                 <span th:if="${product.active()}" class="badge bg-success">Active</span>
                                 <span th:unless="${product.active()}" class="badge bg-secondary">Inactive</span>
                             </td>
-                            <td>
-                                <a th:href="@{/admin/products/{id}/edit(id=${product.id()})}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <td class="text-end">
+                                <a th:href="@{/admin/products/{id}/edit(id=${product.id()})}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
                                 <form th:if="${product.active()}" th:action="@{/admin/products/{id}/deactivate(id=${product.id()})}" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-warning">Deactivate</button>
                                 </form>
@@ -61,17 +86,26 @@
                         </tr>
                     </tbody>
                 </table>
-                
-                <div th:if="${products.empty}" class="text-center py-4">
-                    <p class="text-muted">No products found. <a th:href="@{/admin/products/new}">Create one</a>.</p>
-                </div>
-                
-                <nav th:if="${products.totalPages > 1}" aria-label="Product pagination">
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${products.empty}" class="card-body text-center py-5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="text-muted mb-3" viewBox="0 0 16 16">
+                    <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5z"/>
+                </svg>
+                <h6>No products found</h6>
+                <p class="text-muted mb-0">Start by creating your first product.</p>
+                <a th:href="@{/admin/products/new}" class="btn btn-primary mt-3">Add Product</a>
+            </div>
+
+            <!-- Pagination -->
+            <div class="card-footer bg-white" th:if="${products.totalPages > 1}">
+                <nav>
                     <ul class="pagination justify-content-center mb-0">
                         <li class="page-item" th:classappend="${products.first} ? 'disabled'">
                             <a class="page-link" th:href="@{/admin/products(page=${products.number - 1})}">Previous</a>
                         </li>
-                        <li th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}" 
+                        <li th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}"
                             class="page-item" th:classappend="${i == products.number} ? 'active'">
                             <a class="page-link" th:href="@{/admin/products(page=${i})}" th:text="${i + 1}">1</a>
                         </li>

@@ -5,28 +5,27 @@
 </head>
 <body>
 <main>
-    <div class="container-fluid py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Warehouses</h1>
-            <a th:href="@{/admin/warehouses/new}" class="btn btn-primary">Add Warehouse</a>
-        </div>
-        
+    <div th:with="pageTitle='Warehouses'">
+        <!-- Success Alert -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-        
+
+        <!-- Warehouses Table -->
         <div class="card">
-            <div class="card-body">
-                <table class="table table-hover">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th>Warehouse</th>
                             <th>Address</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="warehouse : ${warehouses}">
-                            <td th:text="${warehouse.name()}">Warehouse Name</td>
+                            <td>
+                                <span class="fw-medium" th:text="${warehouse.name()}">Warehouse Name</span>
+                            </td>
                             <td>
                                 <span th:text="${warehouse.street() + ', ' + warehouse.city() + ' ' + warehouse.postalCode() + ', ' + warehouse.country()}">Address</span>
                             </td>
@@ -34,16 +33,22 @@
                                 <span th:if="${warehouse.active()}" class="badge bg-success">Active</span>
                                 <span th:unless="${warehouse.active()}" class="badge bg-secondary">Inactive</span>
                             </td>
-                            <td>
+                            <td class="text-end">
                                 <a th:href="@{/admin/warehouses/{id}(id=${warehouse.id()})}" class="btn btn-sm btn-outline-primary">View Stock</a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                
-                <div th:if="${#lists.isEmpty(warehouses)}" class="text-center py-4">
-                    <p class="text-muted">No warehouses found. <a th:href="@{/admin/warehouses/new}">Create one</a>.</p>
-                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(warehouses)}" class="card-body text-center py-5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="text-muted mb-3" viewBox="0 0 16 16">
+                    <path d="M8.186 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.892-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319z"/>
+                </svg>
+                <h6>No warehouses found</h6>
+                <p class="text-muted mb-0">Add your first warehouse to manage inventory.</p>
+                <a th:href="@{/admin/warehouses/new}" class="btn btn-primary mt-3">Add Warehouse</a>
             </div>
         </div>
     </div>

@@ -1,31 +1,48 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/main :: layout(~{::title}, ~{::main})}">
 <head>
-    <title>My Orders</title>
+    <title>My Orders - Simple Shop</title>
 </head>
 <body>
 <main>
-    <div class="container py-4">
-        <h1 class="mb-4">My Orders</h1>
-        
-        <div th:if="${orders.empty}" class="text-center py-5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="text-muted mb-3" viewBox="0 0 16 16">
-                <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
-                <path d="M5 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 5 8zm0-2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5z"/>
-            </svg>
-            <p class="text-muted fs-5">You haven't placed any orders yet.</p>
-            <a th:href="@{/products}" class="btn btn-primary mt-3">Start Shopping</a>
+    <div class="container py-5">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="mb-1">My Orders</h1>
+                <p class="text-muted mb-0">View and track your order history</p>
+            </div>
+            <a th:href="@{/products}" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                    <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5z"/>
+                </svg>
+                Shop Now
+            </a>
         </div>
-        
-        <div th:if="${!orders.empty}">
+
+        <!-- Empty State -->
+        <div th:if="${orders.empty}" class="card">
+            <div class="card-body empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="empty-state-icon" viewBox="0 0 16 16">
+                    <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
+                    <path d="M5 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 5 8zm0-2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+                <h4 class="empty-state-title">No orders yet</h4>
+                <p class="empty-state-text">You haven't placed any orders. Start exploring our products!</p>
+                <a th:href="@{/products}" class="btn btn-primary btn-lg">Browse Products</a>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div th:if="${!orders.empty}" class="card">
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
+                <table class="table align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th>Order Number</th>
+                            <th>Order</th>
                             <th>Date</th>
                             <th>Items</th>
-                            <th>Total</th>
+                            <th class="text-end">Total</th>
                             <th>Status</th>
                             <th></th>
                         </tr>
@@ -33,40 +50,51 @@
                     <tbody>
                         <tr th:each="order : ${orders.content}">
                             <td>
-                                <a th:href="@{/orders/{id}(id=${order.id})}" th:text="${order.orderNumber}" class="text-decoration-none fw-bold">ORD-2024-00001</a>
+                                <a th:href="@{/orders/{id}(id=${order.id})}" th:text="${order.orderNumber}" class="fw-bold text-decoration-none">ORD-2024-00001</a>
                             </td>
                             <td th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</td>
-                            <td th:text="${order.itemCount} + ' item(s)'">1 item(s)</td>
-                            <td th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' ' + ${order.currency}">0.00 USD</td>
+                            <td th:text="${order.itemCount} + ' item' + (${order.itemCount > 1} ? 's' : '')">1 item</td>
+                            <td class="text-end fw-medium" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)} + ' ' + ${order.currency}">$0.00</td>
                             <td>
-                                <span class="badge" 
-                                      th:classappend="${order.status == 'DELIVERED' ? 'bg-success' : 
-                                                       (order.status == 'CANCELLED' ? 'bg-danger' : 
+                                <span class="badge"
+                                      th:classappend="${order.status == 'DELIVERED' ? 'bg-success' :
+                                                       (order.status == 'CANCELLED' ? 'bg-danger' :
                                                        (order.status == 'SHIPPED' ? 'bg-info' : 'bg-warning'))}"
                                       th:text="${order.status}">PENDING</span>
                             </td>
-                            <td>
+                            <td class="text-end">
                                 <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-sm btn-outline-primary">View</a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            
-            <nav th:if="${orders.totalPages > 1}">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item" th:classappend="${orders.first ? 'disabled' : ''}">
-                        <a class="page-link" th:href="@{/orders(page=${orders.number - 1})}">Previous</a>
-                    </li>
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}"
-                        th:classappend="${i == orders.number ? 'active' : ''}">
-                        <a class="page-link" th:href="@{/orders(page=${i})}" th:text="${i + 1}">1</a>
-                    </li>
-                    <li class="page-item" th:classappend="${orders.last ? 'disabled' : ''}">
-                        <a class="page-link" th:href="@{/orders(page=${orders.number + 1})}">Next</a>
-                    </li>
-                </ul>
-            </nav>
+
+            <!-- Pagination -->
+            <div class="card-footer bg-white" th:if="${orders.totalPages > 1}">
+                <nav>
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item" th:classappend="${orders.first ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/orders(page=${orders.number - 1})}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                                </svg>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}"
+                            th:classappend="${i == orders.number ? 'active' : ''}">
+                            <a class="page-link" th:href="@{/orders(page=${i})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${orders.last ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/orders(page=${orders.number + 1})}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                </svg>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
 </main>

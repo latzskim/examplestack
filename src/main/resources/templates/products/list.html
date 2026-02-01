@@ -1,68 +1,119 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/main :: layout(~{::title}, ~{::main})}">
 <head>
-    <title>Products</title>
+    <title>Products - Simple Shop</title>
 </head>
 <body>
 <main>
-    <div class="container py-4">
-        <h1 class="mb-4">Products</h1>
-        
+    <div class="container py-5">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="mb-2">Our Products</h1>
+                <p class="text-muted">Discover our curated collection of quality products</p>
+            </div>
+        </div>
+
         <div class="row">
-            <div class="col-md-3">
+            <!-- Sidebar -->
+            <div class="col-lg-3">
                 <div class="card mb-4">
-                    <div class="card-header">Categories</div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <a th:href="@{/products}" th:classappend="${selectedCategoryId == null} ? 'fw-bold' : ''">All Products</a>
-                        </li>
-                        <li th:each="category : ${categories}" class="list-group-item">
-                            <a th:href="@{/products(categoryId=${category.id()})}" 
-                               th:text="${category.name()}"
-                               th:classappend="${selectedCategoryId != null && selectedCategoryId.equals(category.id())} ? 'fw-bold' : ''">Category</a>
-                        </li>
-                    </ul>
+                    <div class="card-header">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                            <path d="M6 1v3H1V1h5zM1 0a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1H1zm14 12v3h-5v-3h5zm-5-1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-5zM6 7v3H1V7h5zM1 6a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H1zm14-6v3h-5V0h5zm-5-1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1h-5z"/>
+                        </svg>
+                        Categories
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a th:href="@{/products}"
+                           th:class="${selectedCategoryId == null} ? 'list-group-item list-group-item-action active' : 'list-group-item list-group-item-action'">
+                            All Products
+                        </a>
+                        <a th:each="category : ${categories}"
+                           th:href="@{/products(categoryId=${category.id()})}"
+                           th:text="${category.name()}"
+                           th:class="${selectedCategoryId != null && selectedCategoryId.equals(category.id())} ? 'list-group-item list-group-item-action active' : 'list-group-item list-group-item-action'">
+                            Category
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Product Count -->
+                <div class="card">
+                    <div class="card-body text-center">
+                        <span class="text-muted small">Showing</span>
+                        <div class="fw-bold fs-4" th:text="${products.totalElements}">0</div>
+                        <span class="text-muted small">products</span>
+                    </div>
                 </div>
             </div>
-            
-            <div class="col-md-9">
-                <div class="row row-cols-1 row-cols-md-3 g-4">
+
+            <!-- Products Grid -->
+            <div class="col-lg-9">
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
                     <div th:each="product : ${products.content}" class="col">
-                        <div class="card h-100">
-                            <img th:if="${product.imageUrl() != null}" th:src="${product.imageUrl()}" class="card-img-top" alt="Product image" style="height: 200px; object-fit: cover;">
-                            <div th:if="${product.imageUrl() == null}" class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                <span class="text-muted">No image</span>
+                        <div class="card product-card h-100">
+                            <div class="card-img-wrapper">
+                                <img th:if="${product.imageUrl() != null}" th:src="${product.imageUrl()}" class="card-img-top" alt="Product image" style="height: 220px; object-fit: cover;">
+                                <div th:if="${product.imageUrl() == null}" class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                                    <div class="text-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="text-muted mb-2" viewBox="0 0 16 16">
+                                            <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                            <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                                        </svg>
+                                        <p class="text-muted small mb-0">No image</p>
+                                    </div>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title" th:text="${product.name()}">Product Name</h5>
-                                <p class="card-text">
-                                    <strong th:text="${#numbers.formatDecimal(product.price(), 1, 2)} + ' ' + ${product.currency()}">$0.00 USD</strong>
-                                </p>
-                                <a th:href="@{/products/{id}(id=${product.id()})}" class="btn btn-primary">View Details</a>
+                                <p class="price-tag mb-3" th:text="${#numbers.formatDecimal(product.price(), 1, 2)} + ' ' + ${product.currency()}">$0.00 USD</p>
+                                <a th:href="@{/products/{id}(id=${product.id()})}" class="btn btn-primary w-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                                    </svg>
+                                    View Details
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <div th:if="${products.totalPages > 1}" class="mt-4">
+
+                <!-- Pagination -->
+                <div th:if="${products.totalPages > 1}" class="mt-5">
                     <nav aria-label="Product pagination">
                         <ul class="pagination justify-content-center">
                             <li class="page-item" th:classappend="${products.first} ? 'disabled'">
-                                <a class="page-link" th:href="@{/products(page=${products.number - 1}, categoryId=${selectedCategoryId})}">Previous</a>
+                                <a class="page-link" th:href="@{/products(page=${products.number - 1}, categoryId=${selectedCategoryId})}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                                    </svg>
+                                </a>
                             </li>
-                            <li th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}" 
+                            <li th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}"
                                 class="page-item" th:classappend="${i == products.number} ? 'active'">
                                 <a class="page-link" th:href="@{/products(page=${i}, categoryId=${selectedCategoryId})}" th:text="${i + 1}">1</a>
                             </li>
                             <li class="page-item" th:classappend="${products.last} ? 'disabled'">
-                                <a class="page-link" th:href="@{/products(page=${products.number + 1}, categoryId=${selectedCategoryId})}">Next</a>
+                                <a class="page-link" th:href="@{/products(page=${products.number + 1}, categoryId=${selectedCategoryId})}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </a>
                             </li>
                         </ul>
                     </nav>
                 </div>
-                
-                <div th:if="${products.empty}" class="text-center py-5">
-                    <p class="text-muted">No products found.</p>
+
+                <!-- Empty State -->
+                <div th:if="${products.empty}" class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="empty-state-icon" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
+                    <h5 class="empty-state-title">No products found</h5>
+                    <p class="empty-state-text">Try adjusting your filters or browse all products</p>
+                    <a th:href="@{/products}" class="btn btn-primary">View All Products</a>
                 </div>
             </div>
         </div>

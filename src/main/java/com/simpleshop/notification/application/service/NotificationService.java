@@ -151,7 +151,8 @@ public class NotificationService {
         }
         
         ShipmentView shipment = shipmentOpt.get();
-        String subject = "Your Order Has Shipped - Tracking: " + shipment.trackingNumber();
+        String statusName = shipment.status().getDisplayName();
+        String subject = statusName + " - Tracking: " + shipment.trackingNumber();
         
         NotificationLog log = NotificationLog.createPending(
             NotificationType.SHIPMENT_CREATED,

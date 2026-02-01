@@ -5,38 +5,48 @@
 </head>
 <body>
 <main>
-    <div class="container-fluid py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Categories</h1>
-            <a th:href="@{/admin/categories/new}" class="btn btn-primary">Add Category</a>
-        </div>
-        
+    <div th:with="pageTitle='Categories'">
+        <!-- Success Alert -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-        
+
+        <!-- Categories Table -->
         <div class="card">
-            <div class="card-body">
-                <table class="table table-hover">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>Description</th>
                             <th>Parent</th>
-                            <th>Sort Order</th>
+                            <th class="text-center">Sort Order</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="category : ${categories}">
-                            <td th:text="${category.name()}">Category Name</td>
+                            <td>
+                                <span class="fw-medium" th:text="${category.name()}">Category Name</span>
+                            </td>
                             <td th:text="${category.description() ?: '-'}">Description</td>
-                            <td th:text="${category.parentName() ?: '-'}">Parent</td>
-                            <td th:text="${category.sortOrder()}">0</td>
+                            <td>
+                                <span th:if="${category.parentName()}" class="badge bg-light text-dark" th:text="${category.parentName()}">Parent</span>
+                                <span th:unless="${category.parentName()}" class="text-muted">-</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary" th:text="${category.sortOrder()}">0</span>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
-                
-                <div th:if="${#lists.isEmpty(categories)}" class="text-center py-4">
-                    <p class="text-muted">No categories found. <a th:href="@{/admin/categories/new}">Create one</a>.</p>
-                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(categories)}" class="card-body text-center py-5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="text-muted mb-3" viewBox="0 0 16 16">
+                    <path d="M6 1v3H1V1h5zM1 0a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1H1zm14 12v3h-5v-3h5zm-5-1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-5zM6 7v3H1V7h5zM1 6a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H1zm14-6v3h-5V0h5zm-5-1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1h-5z"/>
+                </svg>
+                <h6>No categories found</h6>
+                <p class="text-muted mb-0">Start organizing your products with categories.</p>
+                <a th:href="@{/admin/categories/new}" class="btn btn-primary mt-3">Add Category</a>
             </div>
         </div>
     </div>
