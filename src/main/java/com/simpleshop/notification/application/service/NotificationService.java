@@ -14,8 +14,8 @@ import com.simpleshop.notification.domain.model.vo.NotificationType;
 import com.simpleshop.order.application.query.OrderView;
 import com.simpleshop.shared.domain.model.vo.Email;
 import com.simpleshop.shipping.application.query.ShipmentView;
-import io.micrometer.tracing.annotation.NewSpan;
-import io.micrometer.tracing.annotation.SpanTag;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -60,8 +60,8 @@ public class NotificationService {
     }
     
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @NewSpan("notification.sendOrderConfirmation")
-    public void sendOrderConfirmation(@SpanTag("orderId") UUID orderId, Email recipientEmail, UUID userId) {
+    @WithSpan("notification.sendOrderConfirmation")
+    public void sendOrderConfirmation(@SpanAttribute("orderId") UUID orderId, Email recipientEmail, UUID userId) {
         Optional<OrderView> orderOpt = orderQueryPort.getOrderById(orderId);
         if (orderOpt.isEmpty()) {
             logger.error("Order not found for order confirmation: {}", orderId);
@@ -104,8 +104,8 @@ public class NotificationService {
     }
     
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @NewSpan("notification.sendShipmentNotification")
-    public void sendShipmentNotification(@SpanTag("shipmentId") UUID shipmentId, Email recipientEmail) {
+    @WithSpan("notification.sendShipmentNotification")
+    public void sendShipmentNotification(@SpanAttribute("shipmentId") UUID shipmentId, Email recipientEmail) {
         Optional<ShipmentView> shipmentOpt = shipmentQueryPort.getShipmentById(shipmentId);
         if (shipmentOpt.isEmpty()) {
             logger.error("Shipment not found for shipment notification: {}", shipmentId);
@@ -142,8 +142,8 @@ public class NotificationService {
     }
     
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @NewSpan("notification.sendShipmentCreatedNotification")
-    public void sendShipmentCreatedNotification(@SpanTag("shipmentId") UUID shipmentId, Email recipientEmail, String firstName) {
+    @WithSpan("notification.sendShipmentCreatedNotification")
+    public void sendShipmentCreatedNotification(@SpanAttribute("shipmentId") UUID shipmentId, Email recipientEmail, String firstName) {
         Optional<ShipmentView> shipmentOpt = shipmentQueryPort.getShipmentById(shipmentId);
         if (shipmentOpt.isEmpty()) {
             logger.error("Shipment not found for shipment created notification: {}", shipmentId);
@@ -184,8 +184,8 @@ public class NotificationService {
     }
     
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @NewSpan("notification.sendShipmentStatusUpdateNotification")
-    public void sendShipmentStatusUpdateNotification(@SpanTag("shipmentId") UUID shipmentId, Email recipientEmail, String firstName,
+    @WithSpan("notification.sendShipmentStatusUpdateNotification")
+    public void sendShipmentStatusUpdateNotification(@SpanAttribute("shipmentId") UUID shipmentId, Email recipientEmail, String firstName,
                                                       com.simpleshop.shipping.domain.model.vo.ShipmentStatus newStatus,
                                                       com.simpleshop.shipping.domain.model.vo.ShipmentStatus previousStatus,
                                                       String location, String notes) {
@@ -232,8 +232,8 @@ public class NotificationService {
     }
     
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @NewSpan("notification.sendInvoice")
-    public void sendInvoice(@SpanTag("orderId") UUID orderId, Email recipientEmail) {
+    @WithSpan("notification.sendInvoice")
+    public void sendInvoice(@SpanAttribute("orderId") UUID orderId, Email recipientEmail) {
         Optional<OrderView> orderOpt = orderQueryPort.getOrderById(orderId);
         if (orderOpt.isEmpty()) {
             logger.error("Order not found for invoice: {}", orderId);
@@ -272,7 +272,7 @@ public class NotificationService {
     }
     
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @NewSpan("notification.sendWelcomeEmail")
+    @WithSpan("notification.sendWelcomeEmail")
     public void sendWelcomeEmail(Email recipientEmail, String firstName) {
         String subject = "Welcome to Simple Shop!";
         

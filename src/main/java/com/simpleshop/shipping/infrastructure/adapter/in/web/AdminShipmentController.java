@@ -1,6 +1,6 @@
 package com.simpleshop.shipping.infrastructure.adapter.in.web;
 
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import com.simpleshop.shipping.application.command.UpdateShipmentStatusCommand;
 import com.simpleshop.shipping.application.port.in.GetShipmentUseCase;
 import com.simpleshop.shipping.application.port.in.ListShipmentsByOrderUseCase;
@@ -32,7 +32,7 @@ public class AdminShipmentController {
     }
     
     @GetMapping("/order/{orderId}")
-    @NewSpan
+    @WithSpan
     public String listShipmentsByOrder(@PathVariable UUID orderId, Pageable pageable, Model model) {
         Page<ShipmentView> shipments = listShipmentsByOrderUseCase.listShipmentsByOrder(orderId, pageable);
         model.addAttribute("shipments", shipments);
@@ -41,7 +41,7 @@ public class AdminShipmentController {
     }
     
     @PostMapping("/{shipmentId}/status")
-    @NewSpan
+    @WithSpan
     public String updateStatus(@PathVariable UUID shipmentId,
                                 @RequestParam ShipmentStatus newStatus,
                                 @RequestParam(required = false) String location,

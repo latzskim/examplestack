@@ -1,6 +1,6 @@
 package com.simpleshop.inventory.infrastructure.adapter.in.web;
 
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import com.simpleshop.catalog.application.port.in.GetProductUseCase;
 import com.simpleshop.catalog.application.port.in.ListProductsUseCase;
 import com.simpleshop.catalog.application.query.GetProductQuery;
@@ -54,7 +54,7 @@ public class AdminStockController {
     }
     
     @GetMapping
-    @NewSpan
+    @WithSpan
     public String listInventory(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -76,7 +76,7 @@ public class AdminStockController {
     }
     
     @GetMapping("/products/{productId}")
-    @NewSpan
+    @WithSpan
     public String manageProductStock(@PathVariable UUID productId, Model model) {
         ProductView product = getProductUseCase.get(new GetProductQuery(productId))
             .orElse(null);
@@ -109,7 +109,7 @@ public class AdminStockController {
     }
     
     @PostMapping("/products/{productId}/replenish")
-    @NewSpan
+    @WithSpan
     public String replenishStock(
             @PathVariable UUID productId,
             @RequestParam UUID warehouseId,

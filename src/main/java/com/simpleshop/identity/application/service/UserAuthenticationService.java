@@ -8,7 +8,7 @@ import com.simpleshop.identity.domain.exception.InvalidCredentialsException;
 import com.simpleshop.identity.domain.exception.UserInactiveException;
 import com.simpleshop.identity.domain.model.User;
 import com.simpleshop.shared.domain.model.vo.Email;
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +25,7 @@ public class UserAuthenticationService implements AuthenticateUserUseCase {
     }
     
     @Override
-    @NewSpan("identity.authenticateUser")
+    @WithSpan("identity.authenticateUser")
     public User authenticate(AuthenticateUserCommand command) {
         Email email = Email.of(command.email());
         

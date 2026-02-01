@@ -25,8 +25,8 @@ import com.simpleshop.order.domain.model.vo.OrderId;
 import com.simpleshop.order.domain.model.vo.OrderNumber;
 import com.simpleshop.shared.domain.model.vo.Address;
 import com.simpleshop.shared.domain.model.vo.Money;
-import io.micrometer.tracing.annotation.NewSpan;
-import io.micrometer.tracing.annotation.SpanTag;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -60,7 +60,7 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
     }
     
     @Override
-    @NewSpan("order.placeOrder")
+    @WithSpan("order.placeOrder")
     public OrderView execute(PlaceOrderCommand command) {
         List<AllocateStockCommand.AllocationRequest> allocationRequests = command.items().stream()
             .map(item -> new AllocateStockCommand.AllocationRequest(item.productId(), item.quantity()))
@@ -104,7 +104,7 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
     }
     
     @Override
-    @NewSpan("order.placeOrderFromCart")
+    @WithSpan("order.placeOrderFromCart")
     public OrderView execute(PlaceOrderFromCartCommand command) {
         CartView cart = getCartUseCase.execute(new GetCartQuery(command.sessionId(), command.userId()));
         
@@ -153,7 +153,7 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
     }
     
     @Override
-    @NewSpan("order.confirmOrder")
+    @WithSpan("order.confirmOrder")
     public OrderView execute(ConfirmOrderCommand command) {
         Order order = findOrderById(command.orderId());
         order.confirm();
@@ -162,7 +162,7 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
     }
     
     @Override
-    @NewSpan("order.cancelOrder")
+    @WithSpan("order.cancelOrder")
     public void execute(CancelOrderCommand command) {
         Order order = findOrderById(command.orderId());
         order.cancel(command.reason());
@@ -170,7 +170,7 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
     }
     
     @Override
-    @NewSpan("order.shipOrder")
+    @WithSpan("order.shipOrder")
     public OrderView execute(ShipOrderCommand command) {
         Order order = findOrderById(command.orderId());
         order.ship();
@@ -179,7 +179,7 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
     }
     
     @Override
-    @NewSpan("order.deliverOrder")
+    @WithSpan("order.deliverOrder")
     public OrderView execute(DeliverOrderCommand command) {
         Order order = findOrderById(command.orderId());
         order.deliver();
@@ -189,7 +189,7 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
     
     @Override
     @Transactional(readOnly = true)
-    @NewSpan("order.getOrder")
+    @WithSpan("order.getOrder")
     public Optional<OrderView> execute(GetOrderQuery query) {
         return orderRepository.findById(OrderId.of(query.orderId()))
             .map(this::toOrderView);
@@ -197,7 +197,7 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
     
     @Override
     @Transactional(readOnly = true)
-    @NewSpan("order.getOrderByNumber")
+    @WithSpan("order.getOrderByNumber")
     public Optional<OrderView> execute(GetOrderByNumberQuery query) {
         return orderRepository.findByOrderNumber(OrderNumber.of(query.orderNumber()))
             .map(this::toOrderView);
@@ -205,7 +205,7 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
     
     @Override
     @Transactional(readOnly = true)
-    @NewSpan("order.listUserOrders")
+    @WithSpan("order.listUserOrders")
     public Page<OrderSummaryView> execute(ListUserOrdersQuery query) {
         PageRequest pageable = PageRequest.of(query.page(), query.size());
         return orderRepository.findByUserId(query.userId(), pageable)

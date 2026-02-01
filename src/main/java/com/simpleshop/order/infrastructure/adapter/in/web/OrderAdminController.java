@@ -1,6 +1,6 @@
 package com.simpleshop.order.infrastructure.adapter.in.web;
 
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import com.simpleshop.order.application.command.CancelOrderCommand;
 import com.simpleshop.order.application.command.ConfirmOrderCommand;
 import com.simpleshop.order.application.command.DeliverOrderCommand;
@@ -61,7 +61,7 @@ public class OrderAdminController {
     }
     
     @GetMapping
-    @NewSpan
+    @WithSpan
     public String listOrders(@RequestParam(defaultValue = "0") int page,
                              @RequestParam(defaultValue = "20") int size,
                              Model model) {
@@ -72,7 +72,7 @@ public class OrderAdminController {
     }
     
     @GetMapping("/{orderId}")
-    @NewSpan
+    @WithSpan
     public String viewOrder(@PathVariable UUID orderId, Model model) {
         OrderView order = getOrderUseCase.execute(new GetOrderQuery(orderId))
             .orElseThrow(() -> new IllegalArgumentException("Order not found"));
@@ -89,7 +89,7 @@ public class OrderAdminController {
     }
 
     @PostMapping("/{orderId}/shipments/{shipmentId}/status")
-    @NewSpan
+    @WithSpan
     public String updateShipmentStatus(@PathVariable UUID orderId,
                                        @PathVariable UUID shipmentId,
                                        @RequestParam ShipmentStatus newStatus,
@@ -111,7 +111,7 @@ public class OrderAdminController {
     }
     
     @PostMapping("/{orderId}/confirm")
-    @NewSpan
+    @WithSpan
     public String confirmOrder(@PathVariable UUID orderId, RedirectAttributes redirectAttributes) {
         try {
             confirmOrderUseCase.execute(new ConfirmOrderCommand(orderId));
@@ -123,7 +123,7 @@ public class OrderAdminController {
     }
     
     @PostMapping("/{orderId}/ship")
-    @NewSpan
+    @WithSpan
     public String shipOrder(@PathVariable UUID orderId, RedirectAttributes redirectAttributes) {
         try {
             shipOrderUseCase.execute(new ShipOrderCommand(orderId));
@@ -135,7 +135,7 @@ public class OrderAdminController {
     }
     
     @PostMapping("/{orderId}/deliver")
-    @NewSpan
+    @WithSpan
     public String deliverOrder(@PathVariable UUID orderId, RedirectAttributes redirectAttributes) {
         try {
             deliverOrderUseCase.execute(new DeliverOrderCommand(orderId));
@@ -147,7 +147,7 @@ public class OrderAdminController {
     }
     
     @PostMapping("/{orderId}/payment-success")
-    @NewSpan
+    @WithSpan
     public String simulatePaymentSuccess(@PathVariable UUID orderId, RedirectAttributes redirectAttributes) {
         try {
             confirmOrderUseCase.execute(new ConfirmOrderCommand(orderId));
@@ -159,7 +159,7 @@ public class OrderAdminController {
     }
     
     @PostMapping("/{orderId}/payment-failed")
-    @NewSpan
+    @WithSpan
     public String simulatePaymentFailed(@PathVariable UUID orderId, RedirectAttributes redirectAttributes) {
         try {
             cancelOrderUseCase.execute(new CancelOrderCommand(orderId, "Payment failed"));

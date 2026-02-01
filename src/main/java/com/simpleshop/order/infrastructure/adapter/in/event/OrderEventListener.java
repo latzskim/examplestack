@@ -10,7 +10,7 @@ import com.simpleshop.order.application.query.OrderItemView;
 import com.simpleshop.order.application.query.OrderView;
 import com.simpleshop.order.domain.event.OrderCancelled;
 import com.simpleshop.order.domain.event.OrderConfirmed;
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.modulith.events.ApplicationModuleListener;
@@ -42,7 +42,7 @@ public class OrderEventListener {
     }
     
     @ApplicationModuleListener
-    @NewSpan
+    @WithSpan
     public void onOrderCancelled(OrderCancelled event) {
         log.info("Order cancelled: {} - releasing reserved stock", event.getOrderNumber());
         
@@ -71,7 +71,7 @@ public class OrderEventListener {
     }
 
     @ApplicationModuleListener
-    @NewSpan
+    @WithSpan
     public void onOrderConfirmed(OrderConfirmed event) {
         log.info("Order confirmed/paid: {} - confirming stock reservation (stock now sold)", event.getOrderNumber());
         

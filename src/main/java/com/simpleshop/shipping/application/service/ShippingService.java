@@ -11,8 +11,8 @@ import com.simpleshop.shipping.domain.exception.ShipmentNotFoundException;
 import com.simpleshop.shipping.domain.model.Shipment;
 import com.simpleshop.shipping.domain.model.vo.ShipmentId;
 import com.simpleshop.shipping.domain.model.vo.TrackingNumber;
-import io.micrometer.tracing.annotation.NewSpan;
-import io.micrometer.tracing.annotation.SpanTag;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,7 +40,7 @@ public class ShippingService implements
     }
 
     @Override
-    @NewSpan("shipping.createShipment")
+    @WithSpan("shipping.createShipment")
     public ShipmentView createShipment(CreateShipmentCommand command) {
         TrackingNumber trackingNumber = trackingNumberGenerator.generate();
         
@@ -57,7 +57,7 @@ public class ShippingService implements
     }
     
     @Override
-    @NewSpan("shipping.updateStatus")
+    @WithSpan("shipping.updateStatus")
     public ShipmentView updateStatus(UpdateShipmentStatusCommand command) {
         Shipment shipment = shipmentRepository.findById(ShipmentId.of(command.shipmentId()))
             .orElseThrow(() -> new ShipmentNotFoundException(command.shipmentId()));
@@ -70,32 +70,32 @@ public class ShippingService implements
     
     @Override
     @Transactional(readOnly = true)
-    @NewSpan("shipping.getShipment")
-    public Optional<ShipmentView> getShipment(@SpanTag("shipmentId") UUID shipmentId) {
+    @WithSpan("shipping.getShipment")
+    public Optional<ShipmentView> getShipment(@SpanAttribute("shipmentId") UUID shipmentId) {
         return shipmentRepository.findById(ShipmentId.of(shipmentId))
             .map(this::toShipmentView);
     }
     
     @Override
     @Transactional(readOnly = true)
-    @NewSpan("shipping.getShipmentByTrackingNumber")
-    public Optional<ShipmentView> getShipmentByTrackingNumber(@SpanTag("trackingNumber") String trackingNumber) {
+    @WithSpan("shipping.getShipmentByTrackingNumber")
+    public Optional<ShipmentView> getShipmentByTrackingNumber(@SpanAttribute("trackingNumber") String trackingNumber) {
         return shipmentRepository.findByTrackingNumber(TrackingNumber.of(trackingNumber))
             .map(this::toShipmentView);
     }
     
     @Override
     @Transactional(readOnly = true)
-    @NewSpan("shipping.trackShipment")
-    public Optional<ShipmentTrackingView> trackShipment(@SpanTag("trackingNumber") String trackingNumber) {
+    @WithSpan("shipping.trackShipment")
+    public Optional<ShipmentTrackingView> trackShipment(@SpanAttribute("trackingNumber") String trackingNumber) {
         return shipmentRepository.findByTrackingNumber(TrackingNumber.of(trackingNumber))
             .map(this::toTrackingView);
     }
     
     @Override
     @Transactional(readOnly = true)
-    @NewSpan("shipping.listShipmentsByOrder")
-    public Page<ShipmentView> listShipmentsByOrder(@SpanTag("orderId") UUID orderId, Pageable pageable) {
+    @WithSpan("shipping.listShipmentsByOrder")
+    public Page<ShipmentView> listShipmentsByOrder(@SpanAttribute("orderId") UUID orderId, Pageable pageable) {
         return shipmentRepository.findByOrderId(orderId, pageable)
             .map(this::toShipmentView);
     }

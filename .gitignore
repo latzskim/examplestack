@@ -49,6 +49,10 @@ application-local.yml
 ### Docker ###
 docker-compose.override.yml
 
+### OpenTelemetry Agent ###
+opentelemetry-javaagent.jar
+docker/otel/*.jar
+
 ### Zone.Identifier (Windows WSL) ###
 *:Zone.Identifier
 

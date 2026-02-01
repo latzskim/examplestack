@@ -1,6 +1,6 @@
 package com.simpleshop.shipping.infrastructure.adapter.in.web;
 
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import com.simpleshop.shipping.application.port.in.GetShipmentUseCase;
 import com.simpleshop.shipping.application.port.in.TrackShipmentUseCase;
 import com.simpleshop.shipping.application.query.ShipmentTrackingView;
@@ -30,7 +30,7 @@ public class ShipmentController {
     }
     
     @PostMapping("/track")
-    @NewSpan
+    @WithSpan
     public String trackShipment(@RequestParam("trackingNumber") String trackingNumber, Model model) {
         Optional<ShipmentTrackingView> result = trackShipmentUseCase.trackShipment(trackingNumber);
         
@@ -44,7 +44,7 @@ public class ShipmentController {
     }
     
     @GetMapping("/track/{trackingNumber}")
-    @NewSpan
+    @WithSpan
     public String trackShipmentByUrl(@PathVariable String trackingNumber, Model model) {
         Optional<ShipmentTrackingView> result = trackShipmentUseCase.trackShipment(trackingNumber);
         

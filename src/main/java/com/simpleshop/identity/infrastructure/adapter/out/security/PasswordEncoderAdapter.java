@@ -1,7 +1,7 @@
 package com.simpleshop.identity.infrastructure.adapter.out.security;
 
 import com.simpleshop.identity.application.port.out.PasswordEncoderPort;
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -15,13 +15,13 @@ public class PasswordEncoderAdapter implements PasswordEncoderPort {
     }
     
     @Override
-    @NewSpan
+    @WithSpan
     public String encode(String rawPassword) {
         return passwordEncoder.encode(rawPassword);
     }
 
     @Override
-    @NewSpan
+    @WithSpan
     public boolean matches(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }

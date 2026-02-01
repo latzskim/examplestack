@@ -11,7 +11,7 @@ import com.simpleshop.catalog.application.port.out.ProductRepository;
 import com.simpleshop.catalog.domain.model.Product;
 import com.simpleshop.catalog.domain.model.vo.Money;
 import com.simpleshop.catalog.domain.model.vo.ProductId;
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -34,7 +34,7 @@ public class CartService implements AddItemToCartUseCase, RemoveItemFromCartUseC
     }
     
     @Override
-    @NewSpan("cart.addItem")
+    @WithSpan("cart.addItem")
     public CartView execute(AddItemToCartCommand command) {
         Cart cart = getOrCreateCart(command.sessionId(), command.userId());
         
@@ -48,7 +48,7 @@ public class CartService implements AddItemToCartUseCase, RemoveItemFromCartUseC
     }
     
     @Override
-    @NewSpan("cart.removeItem")
+    @WithSpan("cart.removeItem")
     public CartView execute(RemoveItemFromCartCommand command) {
         Cart cart = findCart(command.sessionId(), command.userId())
             .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
@@ -60,7 +60,7 @@ public class CartService implements AddItemToCartUseCase, RemoveItemFromCartUseC
     }
     
     @Override
-    @NewSpan("cart.updateItemQuantity")
+    @WithSpan("cart.updateItemQuantity")
     public CartView execute(UpdateItemQuantityCommand command) {
         Cart cart = findCart(command.sessionId(), command.userId())
             .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
@@ -73,14 +73,14 @@ public class CartService implements AddItemToCartUseCase, RemoveItemFromCartUseC
     
     @Override
     @Transactional(readOnly = true)
-    @NewSpan("cart.getCart")
+    @WithSpan("cart.getCart")
     public CartView execute(GetCartQuery query) {
         Cart cart = getOrCreateCart(query.sessionId(), query.userId());
         return toCartView(cart);
     }
     
     @Override
-    @NewSpan("cart.clearCart")
+    @WithSpan("cart.clearCart")
     public void execute(ClearCartCommand command) {
         Optional<Cart> cartOpt = findCart(command.sessionId(), command.userId());
         
@@ -92,7 +92,7 @@ public class CartService implements AddItemToCartUseCase, RemoveItemFromCartUseC
     }
     
     @Override
-    @NewSpan("cart.mergeCart")
+    @WithSpan("cart.mergeCart")
     public CartView execute(MergeCartCommand command) {
         Optional<Cart> sessionCartOpt = cartRepository.findBySessionId(SessionId.of(command.sessionId()));
         

@@ -1,6 +1,6 @@
 package com.simpleshop.catalog.infrastructure.adapter.in.web;
 
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import com.simpleshop.catalog.application.command.CreateProductCommand;
 import com.simpleshop.catalog.application.command.UpdateProductCommand;
 import com.simpleshop.catalog.application.port.in.*;
@@ -51,7 +51,7 @@ public class AdminProductController {
     }
     
     @GetMapping
-    @NewSpan
+    @WithSpan
     public String listProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -79,7 +79,7 @@ public class AdminProductController {
     }
     
     @PostMapping
-    @NewSpan
+    @WithSpan
     public String createProduct(
             @RequestParam String name,
             @RequestParam(required = false) String description,
@@ -100,7 +100,7 @@ public class AdminProductController {
     }
     
     @GetMapping("/{id}/edit")
-    @NewSpan
+    @WithSpan
     public String editProductForm(@PathVariable UUID id, Model model) {
         ProductView product = getProductUseCase.get(new GetProductQuery(id))
             .orElse(null);
@@ -115,7 +115,7 @@ public class AdminProductController {
     }
     
     @PostMapping("/{id}")
-    @NewSpan
+    @WithSpan
     public String updateProduct(
             @PathVariable UUID id,
             @RequestParam String name,
@@ -136,7 +136,7 @@ public class AdminProductController {
     }
     
     @PostMapping("/{id}/deactivate")
-    @NewSpan
+    @WithSpan
     public String deactivateProduct(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
         deactivateProductUseCase.deactivate(id);
         redirectAttributes.addFlashAttribute("success", "Product deactivated");
@@ -144,7 +144,7 @@ public class AdminProductController {
     }
     
     @PostMapping("/{id}/activate")
-    @NewSpan
+    @WithSpan
     public String activateProduct(@PathVariable UUID id, RedirectAttributes redirectAttributes) {
         activateProductUseCase.activate(id);
         redirectAttributes.addFlashAttribute("success", "Product activated");

@@ -11,7 +11,7 @@ import com.simpleshop.catalog.application.query.ListCategoriesQuery;
 import com.simpleshop.catalog.domain.exception.CategoryNotFoundException;
 import com.simpleshop.catalog.domain.model.Category;
 import com.simpleshop.catalog.domain.model.vo.CategoryId;
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -28,7 +28,7 @@ public class CategoryService implements CreateCategoryUseCase, GetCategoryUseCas
     }
     
     @Override
-    @NewSpan("catalog.createCategory")
+    @WithSpan("catalog.createCategory")
     public CategoryView create(CreateCategoryCommand command) {
         if (command.parentId() != null) {
             categoryRepository.findById(CategoryId.of(command.parentId()))
@@ -48,7 +48,7 @@ public class CategoryService implements CreateCategoryUseCase, GetCategoryUseCas
     
     @Override
     @Transactional(readOnly = true)
-    @NewSpan("catalog.getCategory")
+    @WithSpan("catalog.getCategory")
     public Optional<CategoryView> get(GetCategoryQuery query) {
         return categoryRepository.findById(CategoryId.of(query.categoryId()))
             .map(this::toCategoryView);
@@ -56,7 +56,7 @@ public class CategoryService implements CreateCategoryUseCase, GetCategoryUseCas
     
     @Override
     @Transactional(readOnly = true)
-    @NewSpan("catalog.listCategories")
+    @WithSpan("catalog.listCategories")
     public List<CategoryView> list(ListCategoriesQuery query) {
         List<Category> categories;
         if (query.parentId() != null) {

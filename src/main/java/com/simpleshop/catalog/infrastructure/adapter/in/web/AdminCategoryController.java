@@ -1,6 +1,6 @@
 package com.simpleshop.catalog.infrastructure.adapter.in.web;
 
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import com.simpleshop.catalog.application.command.CreateCategoryCommand;
 import com.simpleshop.catalog.application.port.in.CreateCategoryUseCase;
 import com.simpleshop.catalog.application.port.in.ListCategoriesUseCase;
@@ -27,7 +27,7 @@ public class AdminCategoryController {
     }
     
     @GetMapping
-    @NewSpan
+    @WithSpan
     public String listCategories(Model model) {
         model.addAttribute("categories", listCategoriesUseCase.list(ListCategoriesQuery.root()));
         return "admin/categories/list";
@@ -40,7 +40,7 @@ public class AdminCategoryController {
     }
     
     @PostMapping
-    @NewSpan
+    @WithSpan
     public String createCategory(
             @RequestParam String name,
             @RequestParam(required = false) String description,

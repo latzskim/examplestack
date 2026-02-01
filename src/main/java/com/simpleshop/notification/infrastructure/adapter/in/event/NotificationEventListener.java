@@ -12,7 +12,7 @@ import com.simpleshop.shared.domain.model.vo.Email;
 import com.simpleshop.shipping.application.query.ShipmentView;
 import com.simpleshop.shipping.domain.event.ShipmentCreated;
 import com.simpleshop.shipping.domain.event.ShipmentStatusUpdated;
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.modulith.events.ApplicationModuleListener;
@@ -51,7 +51,7 @@ public class NotificationEventListener {
     }
     
     @ApplicationModuleListener
-    @NewSpan
+    @WithSpan
     public void onUserRegistered(UserRegistered event) {
         logger.info("User registered: {} - sending welcome email", event.getUserId());
         
@@ -66,7 +66,7 @@ public class NotificationEventListener {
     }
     
     @ApplicationModuleListener
-    @NewSpan
+    @WithSpan
     public void onOrderConfirmed(OrderConfirmed event) {
         logger.info("Order confirmed: {} - sending notifications", event.getOrderNumber());
         
@@ -97,7 +97,7 @@ public class NotificationEventListener {
     }
     
     @ApplicationModuleListener
-    @NewSpan
+    @WithSpan
     public void onShipmentCreated(ShipmentCreated event) {
         logger.info("Shipment created: {} - sending tracking notification", event.getTrackingNumber());
         
@@ -130,7 +130,7 @@ public class NotificationEventListener {
     }
     
     @ApplicationModuleListener
-    @NewSpan
+    @WithSpan
     public void onShipmentStatusUpdated(ShipmentStatusUpdated event) {
         logger.info("Shipment status updated: {} from {} to {}", 
             event.getTrackingNumber(), 

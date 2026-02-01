@@ -11,7 +11,7 @@ import com.simpleshop.catalog.application.query.ProductView;
 import com.simpleshop.inventory.application.port.in.CheckStockAvailabilityUseCase;
 import com.simpleshop.inventory.application.query.CheckStockAvailabilityQuery;
 import com.simpleshop.inventory.application.query.ProductAvailabilityView;
-import io.micrometer.tracing.annotation.NewSpan;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,7 +41,7 @@ public class ProductController {
     }
     
     @GetMapping
-    @NewSpan
+    @WithSpan
     public String listProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
@@ -59,7 +59,7 @@ public class ProductController {
     }
     
     @GetMapping("/{id}")
-    @NewSpan
+    @WithSpan
     public String getProduct(@PathVariable UUID id, Model model) {
         ProductView product = getProductUseCase.get(new GetProductQuery(id))
             .orElse(null);
