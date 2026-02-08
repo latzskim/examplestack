@@ -2,6 +2,7 @@ package com.simpleshop.cart.infrastructure.adapter.in.web;
 
 import com.simpleshop.cart.application.command.MergeCartCommand;
 import com.simpleshop.cart.application.port.in.MergeCartUseCase;
+import com.simpleshop.identity.infrastructure.security.LoginAttemptService;
 import com.simpleshop.identity.infrastructure.security.ShopUserDetails;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,10 +22,13 @@ public class CartMergeAuthenticationSuccessHandler implements AuthenticationSucc
     private static final String CART_SESSION_ID = "CART_SESSION_ID";
     
     private final MergeCartUseCase mergeCartUseCase;
+    private final LoginAttemptService loginAttemptService;
     private final AuthenticationSuccessHandler delegate;
     
-    public CartMergeAuthenticationSuccessHandler(MergeCartUseCase mergeCartUseCase) {
+    public CartMergeAuthenticationSuccessHandler(MergeCartUseCase mergeCartUseCase,
+                                                 LoginAttemptService loginAttemptService) {
         this.mergeCartUseCase = mergeCartUseCase;
+        this.loginAttemptService = loginAttemptService;
         SavedRequestAwareAuthenticationSuccessHandler savedRequestHandler = new SavedRequestAwareAuthenticationSuccessHandler();
         savedRequestHandler.setDefaultTargetUrl("/products");
         savedRequestHandler.setAlwaysUseDefaultTargetUrl(false);
@@ -35,6 +39,8 @@ public class CartMergeAuthenticationSuccessHandler implements AuthenticationSucc
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
+        loginAttemptService.clearFailures(request);
+
         HttpSession session = request.getSession(false);
         
         if (session != null && authentication.getPrincipal() instanceof ShopUserDetails userDetails) {

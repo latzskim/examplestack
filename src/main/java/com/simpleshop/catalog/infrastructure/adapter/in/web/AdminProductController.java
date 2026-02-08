@@ -9,7 +9,6 @@ import com.simpleshop.inventory.application.port.in.CheckStockAvailabilityUseCas
 import com.simpleshop.inventory.application.query.CheckStockAvailabilityQuery;
 import com.simpleshop.inventory.application.query.ProductAvailabilityView;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping("/admin/products")
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminProductController {
     
     private final ListProductsUseCase listProductsUseCase;

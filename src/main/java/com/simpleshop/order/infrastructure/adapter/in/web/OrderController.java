@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -52,7 +51,6 @@ public class OrderController {
     }
     
     @GetMapping("/checkout")
-    @PreAuthorize("isAuthenticated()")
     public String showCheckoutForm(HttpSession session,
                                    @AuthenticationPrincipal ShopUserDetails user,
                                    Model model) {
@@ -68,7 +66,6 @@ public class OrderController {
     }
     
     @PostMapping("/checkout")
-    @PreAuthorize("isAuthenticated()")
     @WithSpan
     public String processCheckout(@ModelAttribute CheckoutForm form,
                                   HttpSession session,
@@ -99,7 +96,6 @@ public class OrderController {
     }
     
     @GetMapping("/checkout/confirmation/{orderId}")
-    @PreAuthorize("isAuthenticated()")
     @WithSpan
     public String showConfirmation(@PathVariable UUID orderId,
                                    @AuthenticationPrincipal ShopUserDetails user,
@@ -113,7 +109,6 @@ public class OrderController {
     }
     
     @GetMapping("/orders")
-    @PreAuthorize("isAuthenticated()")
     @WithSpan
     public String listOrders(@RequestParam(defaultValue = "0") int page,
                              @AuthenticationPrincipal ShopUserDetails user,
@@ -128,7 +123,6 @@ public class OrderController {
     }
     
     @GetMapping("/orders/{orderId}")
-    @PreAuthorize("isAuthenticated()")
     @WithSpan
     public String viewOrder(@PathVariable UUID orderId,
                             @AuthenticationPrincipal ShopUserDetails user,
@@ -148,7 +142,6 @@ public class OrderController {
     }
     
     @PostMapping("/orders/{orderId}/cancel")
-    @PreAuthorize("isAuthenticated()")
     @WithSpan
     public String cancelOrder(@PathVariable UUID orderId,
                               @RequestParam(required = false) String reason,

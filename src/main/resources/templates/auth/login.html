@@ -38,6 +38,10 @@
                 Your session has expired. Please sign in again.
             </div>
 
+            <div th:if="${param.rateLimited}" class="alert alert-warning">
+                Too many failed attempts. Try again later.
+            </div>
+
             <!-- Success Alert -->
             <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 

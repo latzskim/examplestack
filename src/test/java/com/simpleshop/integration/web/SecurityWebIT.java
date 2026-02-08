@@ -11,12 +11,19 @@ import com.simpleshop.catalog.infrastructure.adapter.out.persistence.ProductJpaR
 import com.simpleshop.identity.domain.model.User;
 import com.simpleshop.identity.domain.model.vo.PersonName;
 import com.simpleshop.identity.infrastructure.adapter.out.persistence.JpaUserRepository;
+import com.simpleshop.identity.infrastructure.security.LoginAttemptService;
 import com.simpleshop.identity.infrastructure.security.ShopUserDetails;
+import com.simpleshop.order.domain.model.Order;
+import com.simpleshop.order.domain.model.OrderItem;
+import com.simpleshop.order.domain.model.vo.OrderNumber;
+import com.simpleshop.shared.domain.model.vo.Address;
 import com.simpleshop.inventory.infrastructure.adapter.out.persistence.JpaStockRepository;
 import com.simpleshop.inventory.infrastructure.adapter.out.persistence.JpaWarehouseRepository;
 import com.simpleshop.notification.infrastructure.adapter.out.persistence.JpaNotificationLogRepository;
 import com.simpleshop.order.infrastructure.adapter.out.persistence.OrderJpaRepository;
 import com.simpleshop.shared.domain.model.vo.Email;
+import com.simpleshop.shipping.domain.model.Shipment;
+import com.simpleshop.shipping.domain.model.vo.TrackingNumber;
 import com.simpleshop.shipping.infrastructure.adapter.out.persistence.ShipmentJpaRepository;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +42,8 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,6 +52,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -84,6 +94,9 @@ class SecurityWebIT {
     @Autowired
     private JpaWarehouseRepository warehouseRepository;
 
+    @Autowired
+    private LoginAttemptService loginAttemptService;
+
     @BeforeEach
     void cleanDatabase() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context)
@@ -98,6 +111,7 @@ class SecurityWebIT {
         warehouseRepository.deleteAll();
         productRepository.deleteAll();
         userRepository.deleteAll();
+        loginAttemptService.clearAll();
     }
 
     @Test
@@ -229,12 +243,91 @@ class SecurityWebIT {
         }
     }
 
+    @Test
+    void intP011_shouldRestrictShipmentTrackingToOwnerOrAdmin() throws Exception {
+        User owner = createUser("shipment-owner@example.com", false, "owner-pass");
+        User stranger = createUser("shipment-stranger@example.com", false, "stranger-pass");
+        User admin = createUser("shipment-admin@example.com", true, "admin-pass");
+
+        Order order = createOrderForUser(owner.getUserId().getValue(), "ORD-2026-00001");
+        Shipment shipment = shipmentRepository.save(Shipment.create(
+            TrackingNumber.of("SHIP-2026-00001"),
+            order.getId(),
+            UUID.randomUUID(),
+            Address.of("100 Market St", "Austin", "73301", "USA"),
+            LocalDate.now().plusDays(3)
+        ));
+
+        mockMvc.perform(get("/shipments/track/{trackingNumber}", shipment.getTrackingNumber().getValue())
+                .with(shopUser(owner)))
+            .andExpect(status().isOk())
+            .andExpect(model().attributeExists("tracking"));
+
+        mockMvc.perform(get("/shipments/track/{trackingNumber}", shipment.getTrackingNumber().getValue())
+                .with(shopUser(stranger)))
+            .andExpect(status().isOk())
+            .andExpect(model().attributeExists("error"))
+            .andExpect(model().attributeDoesNotExist("tracking"));
+
+        mockMvc.perform(get("/shipments/track/{trackingNumber}", shipment.getTrackingNumber().getValue())
+                .with(shopUser(admin)))
+            .andExpect(status().isOk())
+            .andExpect(model().attributeExists("tracking"));
+    }
+
+    @Test
+    void intP012_shouldRateLimitFailedLoginAttempts() throws Exception {
+        String email = "rate-limit-user@example.com";
+        String password = "correct-pass";
+        createUser(email, false, password);
+
+        for (int attempt = 1; attempt <= 4; attempt++) {
+            mockMvc.perform(post("/login")
+                    .param("username", email)
+                    .param("password", "wrong-pass")
+                    .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?error=true"));
+        }
+
+        mockMvc.perform(post("/login")
+                .param("username", email)
+                .param("password", "wrong-pass")
+                .with(csrf()))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/login?rateLimited=true"));
+
+        mockMvc.perform(post("/login")
+                .param("username", email)
+                .param("password", password)
+                .with(csrf()))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/login?rateLimited=true"));
+    }
+
     private User createUser(String email, boolean admin, String rawPassword) {
         String encodedPassword = passwordEncoder.encode(rawPassword);
         User user = admin
             ? User.registerAdmin(Email.of(email), encodedPassword, PersonName.of("Admin", "User"))
             : User.register(Email.of(email), encodedPassword, PersonName.of("Regular", "User"));
         return userRepository.save(user);
+    }
+
+    private Order createOrderForUser(UUID userId, String orderNumber) {
+        OrderItem item = OrderItem.create(
+            UUID.randomUUID(),
+            "Private Product",
+            1,
+            com.simpleshop.shared.domain.model.vo.Money.usd(new BigDecimal("49.99")),
+            UUID.randomUUID()
+        );
+        Order order = Order.place(
+            OrderNumber.of(orderNumber),
+            userId,
+            Address.of("100 Market St", "Austin", "73301", "USA"),
+            List.of(item)
+        );
+        return orderRepository.save(order);
     }
 
     private RequestPostProcessor shopUser(User user) {

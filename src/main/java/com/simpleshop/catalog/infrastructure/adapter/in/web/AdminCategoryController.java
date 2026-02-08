@@ -5,7 +5,6 @@ import com.simpleshop.catalog.application.command.CreateCategoryCommand;
 import com.simpleshop.catalog.application.port.in.CreateCategoryUseCase;
 import com.simpleshop.catalog.application.port.in.ListCategoriesUseCase;
 import com.simpleshop.catalog.application.query.ListCategoriesQuery;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +13,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping("/admin/categories")
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminCategoryController {
     
     private final ListCategoriesUseCase listCategoriesUseCase;

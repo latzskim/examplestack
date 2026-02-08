@@ -5,11 +5,13 @@ import com.simpleshop.identity.application.command.RegisterUserCommand;
 import com.simpleshop.identity.application.port.in.RegisterUserUseCase;
 import com.simpleshop.identity.domain.exception.EmailAlreadyExistsException;
 import com.simpleshop.identity.infrastructure.adapter.in.web.dto.RegisterRequest;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -33,34 +35,27 @@ public class AuthController {
     
     @PostMapping("/register")
     @WithSpan
-    public String register(
-            @RequestParam String email,
-            @RequestParam String password,
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            Model model,
-            RedirectAttributes redirectAttributes
-    ) {
-        RegisterRequest request = new RegisterRequest(email, password, firstName, lastName);
-        model.addAttribute("registerRequest", request);
-        
-        if (email == null || email.isBlank()) {
-            model.addAttribute("emailError", "Email is required");
-            return "auth/register";
-        }
-        
-        if (password == null || password.isBlank()) {
-            model.addAttribute("passwordError", "Password is required");
-            return "auth/register";
-        }
-        
-        if (password.length() < 8) {
-            model.addAttribute("passwordError", "Password must be at least 8 characters");
+    public String register(@Valid @ModelAttribute RegisterRequest registerRequest,
+                           BindingResult bindingResult,
+                           Model model,
+                           RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            if (bindingResult.hasFieldErrors("email")) {
+                model.addAttribute("emailError", bindingResult.getFieldError("email").getDefaultMessage());
+            }
+            if (bindingResult.hasFieldErrors("password")) {
+                model.addAttribute("passwordError", bindingResult.getFieldError("password").getDefaultMessage());
+            }
             return "auth/register";
         }
         
         try {
-            RegisterUserCommand command = new RegisterUserCommand(email, password, firstName, lastName);
+            RegisterUserCommand command = new RegisterUserCommand(
+                registerRequest.email(),
+                registerRequest.password(),
+                registerRequest.firstName(),
+                registerRequest.lastName()
+            );
             registerUserUseCase.register(command);
             redirectAttributes.addFlashAttribute("success", "Registration successful! Please login.");
             return "redirect:/login";

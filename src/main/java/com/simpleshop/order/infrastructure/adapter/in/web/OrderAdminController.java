@@ -19,7 +19,6 @@ import com.simpleshop.shipping.domain.model.vo.ShipmentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +29,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping("/admin/orders")
-@PreAuthorize("hasRole('ADMIN')")
 public class OrderAdminController {
 
     private final ConfirmOrderUseCase confirmOrderUseCase;
