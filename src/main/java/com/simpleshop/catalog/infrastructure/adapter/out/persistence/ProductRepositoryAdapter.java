@@ -6,6 +6,8 @@ import com.simpleshop.catalog.domain.model.vo.ProductId;
 import com.simpleshop.catalog.domain.model.vo.Sku;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import java.util.Collection;
+import java.util.List;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +29,14 @@ public class ProductRepositoryAdapter implements ProductRepository {
     @Override
     public Optional<Product> findById(ProductId id) {
         return jpaRepository.findById(id.getValue());
+    }
+
+    @Override
+    public List<Product> findByIds(Collection<UUID> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        return jpaRepository.findAllById(ids);
     }
 
     @Override

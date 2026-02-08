@@ -1,6 +1,7 @@
 package com.simpleshop.order.infrastructure.adapter.out.persistence;
 
 import com.simpleshop.order.application.port.out.OrderRepository;
+import com.simpleshop.order.application.port.out.OrderSummaryProjection;
 import com.simpleshop.order.domain.model.Order;
 import com.simpleshop.order.domain.model.vo.OrderId;
 import com.simpleshop.order.domain.model.vo.OrderNumber;
@@ -37,6 +38,20 @@ public class OrderRepositoryAdapter implements OrderRepository {
     @Override
     public Page<Order> findByUserId(UUID userId, Pageable pageable) {
         return jpaRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+    }
+
+    @Override
+    public Page<OrderSummaryProjection> findOrderSummariesByUserId(UUID userId, Pageable pageable) {
+        return jpaRepository.findOrderSummariesByUserId(userId, pageable)
+            .map(summary -> new OrderSummaryProjection(
+                summary.getId(),
+                summary.getOrderNumber(),
+                summary.getStatus().name(),
+                summary.getTotalAmount(),
+                summary.getCurrency(),
+                Math.toIntExact(summary.getItemCount()),
+                summary.getCreatedAt()
+            ));
     }
 
     @Override

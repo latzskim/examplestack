@@ -6,7 +6,6 @@ import com.simpleshop.catalog.application.command.UpdateProductCommand;
 import com.simpleshop.catalog.application.port.in.*;
 import com.simpleshop.catalog.application.query.*;
 import com.simpleshop.inventory.application.port.in.CheckStockAvailabilityUseCase;
-import com.simpleshop.inventory.application.query.CheckStockAvailabilityQuery;
 import com.simpleshop.inventory.application.query.ProductAvailabilityView;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -14,6 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -57,12 +59,17 @@ public class AdminProductController {
         
         ListProductsQuery query = ListProductsQuery.all(page, size);
         Page<ProductListView> products = listProductsUseCase.list(query);
-        
-        java.util.Map<java.util.UUID, Integer> stockMap = new java.util.HashMap<>();
+
+        List<UUID> productIds = products.getContent().stream()
+            .map(ProductListView::id)
+            .toList();
+        Map<UUID, ProductAvailabilityView> availabilityByProduct =
+            checkStockAvailabilityUseCase.checkMany(productIds);
+
+        Map<UUID, Integer> stockMap = new HashMap<>();
         for (ProductListView product : products.getContent()) {
-            ProductAvailabilityView availability = checkStockAvailabilityUseCase.check(
-                new CheckStockAvailabilityQuery(product.id(), null));
-            stockMap.put(product.id(), availability.totalAvailable());
+            ProductAvailabilityView availability = availabilityByProduct.get(product.id());
+            stockMap.put(product.id(), availability != null ? availability.totalAvailable() : 0);
         }
         
         model.addAttribute("products", products);

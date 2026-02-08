@@ -8,7 +8,6 @@ import com.simpleshop.cart.application.query.CartView;
 import com.simpleshop.cart.application.query.GetCartQuery;
 import com.simpleshop.catalog.application.port.out.ProductRepository;
 import com.simpleshop.catalog.domain.model.Product;
-import com.simpleshop.catalog.domain.model.vo.ProductId;
 import com.simpleshop.inventory.application.command.AllocateStockCommand;
 import com.simpleshop.inventory.application.port.in.AllocateStockUseCase;
 import com.simpleshop.inventory.application.query.StockAllocationResult;
@@ -16,6 +15,7 @@ import com.simpleshop.order.application.command.*;
 import com.simpleshop.order.application.port.in.*;
 import com.simpleshop.order.application.port.out.OrderNumberGenerator;
 import com.simpleshop.order.application.port.out.OrderRepository;
+import com.simpleshop.order.application.port.out.OrderSummaryProjection;
 import com.simpleshop.order.application.query.*;
 import com.simpleshop.order.domain.exception.EmptyOrderException;
 import com.simpleshop.order.domain.exception.OrderNotFoundException;
@@ -26,15 +26,17 @@ import com.simpleshop.order.domain.model.vo.OrderNumber;
 import com.simpleshop.shared.domain.model.vo.Address;
 import com.simpleshop.shared.domain.model.vo.Money;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
-import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -65,6 +67,13 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
         List<AllocateStockCommand.AllocationRequest> allocationRequests = command.items().stream()
             .map(item -> new AllocateStockCommand.AllocationRequest(item.productId(), item.quantity()))
             .toList();
+
+        List<UUID> productIds = command.items().stream()
+            .map(PlaceOrderCommand.OrderItemData::productId)
+            .distinct()
+            .toList();
+        Map<UUID, Product> productsById = productRepository.findByIds(productIds).stream()
+            .collect(Collectors.toMap(Product::getId, Function.identity()));
         
         StockAllocationResult allocationResult = allocateStockUseCase.allocate(
             new AllocateStockCommand(allocationRequests)
@@ -79,8 +88,10 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
         
         List<OrderItem> orderItems = new ArrayList<>();
         for (PlaceOrderCommand.OrderItemData itemData : command.items()) {
-            Product product = productRepository.findById(ProductId.of(itemData.productId()))
-                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + itemData.productId()));
+            Product product = productsById.get(itemData.productId());
+            if (product == null) {
+                throw new IllegalArgumentException("Product not found: " + itemData.productId());
+            }
             
             com.simpleshop.catalog.domain.model.vo.Money catalogPrice = product.getPrice();
             Money sharedPrice = Money.of(catalogPrice.getAmount(), catalogPrice.getCurrency());
@@ -208,7 +219,7 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
     @WithSpan("order.listUserOrders")
     public Page<OrderSummaryView> execute(ListUserOrdersQuery query) {
         PageRequest pageable = PageRequest.of(query.page(), query.size());
-        return orderRepository.findByUserId(query.userId(), pageable)
+        return orderRepository.findOrderSummariesByUserId(query.userId(), pageable)
             .map(this::toOrderSummaryView);
     }
     
@@ -257,15 +268,15 @@ public class OrderService implements PlaceOrderUseCase, PlaceOrderFromCartUseCas
         );
     }
     
-    private OrderSummaryView toOrderSummaryView(Order order) {
+    private OrderSummaryView toOrderSummaryView(OrderSummaryProjection order) {
         return new OrderSummaryView(
-            order.getId(),
-            order.getOrderNumber().getValue(),
-            order.getStatus().name(),
-            order.getTotalAmount().getAmount(),
-            order.getTotalAmount().getCurrencyCode(),
-            order.getItemCount(),
-            order.getCreatedAt()
+            order.id(),
+            order.orderNumber(),
+            order.status(),
+            order.totalAmount(),
+            order.currency(),
+            order.itemCount(),
+            order.createdAt()
         );
     }
 }

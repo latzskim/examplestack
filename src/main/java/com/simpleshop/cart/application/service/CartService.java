@@ -17,8 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -72,7 +74,6 @@ public class CartService implements AddItemToCartUseCase, RemoveItemFromCartUseC
     }
     
     @Override
-    @Transactional(readOnly = true)
     @WithSpan("cart.getCart")
     public CartView execute(GetCartQuery query) {
         Cart cart = getOrCreateCart(query.sessionId(), query.userId());
@@ -139,12 +140,17 @@ public class CartService implements AddItemToCartUseCase, RemoveItemFromCartUseC
     }
     
     private CartView toCartView(Cart cart) {
+        List<UUID> productIds = cart.getItems().stream()
+            .map(CartItem::getProductId)
+            .distinct()
+            .toList();
+        Map<UUID, String> productNames = productRepository.findByIds(productIds).stream()
+            .collect(Collectors.toMap(Product::getId, Product::getName, (left, right) -> left));
+
         List<CartItemView> itemViews = new ArrayList<>();
         
         for (CartItem item : cart.getItems()) {
-            String productName = productRepository.findById(ProductId.of(item.getProductId()))
-                .map(Product::getName)
-                .orElse("Unknown Product");
+            String productName = productNames.getOrDefault(item.getProductId(), "Unknown Product");
             
             Money price = item.getPriceAtAddition();
             Money subtotal = item.getSubtotal();

@@ -13,5 +13,6 @@ public interface OrderRepository {
     Optional<Order> findById(OrderId id);
     Optional<Order> findByOrderNumber(OrderNumber orderNumber);
     Page<Order> findByUserId(UUID userId, Pageable pageable);
+    Page<OrderSummaryProjection> findOrderSummariesByUserId(UUID userId, Pageable pageable);
     Page<Order> findAll(Pageable pageable);
 }

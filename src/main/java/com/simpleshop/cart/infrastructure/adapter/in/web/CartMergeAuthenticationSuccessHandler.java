@@ -39,11 +39,18 @@ public class CartMergeAuthenticationSuccessHandler implements AuthenticationSucc
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        loginAttemptService.clearFailures(request);
-
         HttpSession session = request.getSession(false);
         
         if (session != null && authentication.getPrincipal() instanceof ShopUserDetails userDetails) {
+            String clientIp = request.getRemoteAddr();
+            String username = userDetails.getUsername();
+            if (loginAttemptService.isBlocked(clientIp, username)) {
+                response.sendRedirect("/login?rateLimited=true");
+                return;
+            }
+
+            loginAttemptService.clearFailures(clientIp, username);
+
             String sessionCartId = (String) session.getAttribute(CART_SESSION_ID);
             UUID userId = userDetails.getUserId().getValue();
             
@@ -55,6 +62,8 @@ public class CartMergeAuthenticationSuccessHandler implements AuthenticationSucc
                 } catch (Exception ignored) {
                 }
             }
+        } else {
+            loginAttemptService.clearFailures(request);
         }
         
         delegate.onAuthenticationSuccess(request, response, authentication);

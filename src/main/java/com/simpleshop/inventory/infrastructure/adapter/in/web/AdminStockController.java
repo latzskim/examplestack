@@ -23,6 +23,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -59,12 +60,19 @@ public class AdminStockController {
             Model model) {
         
         Page<ProductListView> products = listProductsUseCase.list(ListProductsQuery.all(page, size));
-        
+
+        List<UUID> productIds = products.getContent().stream()
+            .map(ProductListView::id)
+            .toList();
+        Map<UUID, ProductAvailabilityView> availabilityByProduct =
+            checkStockAvailabilityUseCase.checkMany(productIds);
+
         List<ProductStockInfo> productStocks = products.getContent().stream()
             .map(p -> {
-                ProductAvailabilityView availability = checkStockAvailabilityUseCase.check(
-                    new CheckStockAvailabilityQuery(p.id(), null));
-                return new ProductStockInfo(p, availability.totalAvailable(), availability.totalReserved());
+                ProductAvailabilityView availability = availabilityByProduct.get(p.id());
+                int totalAvailable = availability != null ? availability.totalAvailable() : 0;
+                int totalReserved = availability != null ? availability.totalReserved() : 0;
+                return new ProductStockInfo(p, totalAvailable, totalReserved);
             })
             .toList();
         

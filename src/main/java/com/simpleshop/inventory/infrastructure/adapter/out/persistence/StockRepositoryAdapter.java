@@ -6,7 +6,10 @@ import com.simpleshop.inventory.domain.model.vo.StockId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,6 +38,14 @@ public class StockRepositoryAdapter implements StockRepository {
     }
 
     @Override
+    public List<Stock> findByProductIds(Collection<UUID> productIds) {
+        if (productIds.isEmpty()) {
+            return List.of();
+        }
+        return jpaRepository.findByProductIdIn(productIds);
+    }
+
+    @Override
     public Page<Stock> findByWarehouseId(UUID warehouseId, Pageable pageable) {
         return jpaRepository.findByWarehouseId(warehouseId, pageable);
     }
@@ -52,5 +63,30 @@ public class StockRepositoryAdapter implements StockRepository {
     @Override
     public int sumReservedByProductId(UUID productId) {
         return jpaRepository.sumReservedByProductId(productId);
+    }
+
+    @Override
+    public Map<UUID, Integer> sumAvailableByProductIds(Collection<UUID> productIds) {
+        if (productIds.isEmpty()) {
+            return Map.of();
+        }
+        return toTotalsMap(jpaRepository.sumAvailableByProductIds(productIds));
+    }
+
+    @Override
+    public Map<UUID, Integer> sumReservedByProductIds(Collection<UUID> productIds) {
+        if (productIds.isEmpty()) {
+            return Map.of();
+        }
+        return toTotalsMap(jpaRepository.sumReservedByProductIds(productIds));
+    }
+
+    private Map<UUID, Integer> toTotalsMap(List<JpaStockRepository.ProductStockTotal> totals) {
+        Map<UUID, Integer> result = new LinkedHashMap<>();
+        for (JpaStockRepository.ProductStockTotal row : totals) {
+            long total = row.getTotal() == null ? 0L : row.getTotal();
+            result.put(row.getProductId(), Math.toIntExact(total));
+        }
+        return result;
     }
 }

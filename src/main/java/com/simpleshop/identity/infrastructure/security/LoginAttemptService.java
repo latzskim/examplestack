@@ -41,16 +41,23 @@ public class LoginAttemptService {
             return false;
         }
 
-        String key = key(request);
-        Instant now = Instant.now();
-        Instant until = blockedUntil.get(key);
-        if (until == null) {
+        return isBlocked(clientIp(request), request.getParameter("username"));
+    }
+
+    public boolean isBlocked(String clientIp, String username) {
+        if (!enabled) {
             return false;
         }
-        if (until.isAfter(now)) {
+
+        String key = key(clientIp, username);
+        String unknownUserKey = key(clientIp, UNKNOWN_USER);
+        Instant now = Instant.now();
+        if (isKeyBlocked(key, now)) {
             return true;
         }
-        blockedUntil.remove(key);
+        if (!unknownUserKey.equals(key) && isKeyBlocked(unknownUserKey, now)) {
+            return true;
+        }
         return false;
     }
 
@@ -60,15 +67,11 @@ public class LoginAttemptService {
         }
 
         String key = key(request);
+        String unknownUserKey = key(clientIp(request), UNKNOWN_USER);
         Instant now = Instant.now();
-        Deque<Instant> attempts = failedAttempts.computeIfAbsent(key, ignored -> new ArrayDeque<>());
-
-        pruneOldAttempts(attempts, now);
-        attempts.addLast(now);
-
-        if (attempts.size() >= maxAttempts) {
-            blockedUntil.put(key, now.plus(window));
-            failedAttempts.remove(key);
+        recordFailureForKey(key, now);
+        if (!unknownUserKey.equals(key)) {
+            recordFailureForKey(unknownUserKey, now);
         }
     }
 
@@ -85,9 +88,12 @@ public class LoginAttemptService {
             return;
         }
 
-        String key = key(clientIp, username);
-        failedAttempts.remove(key);
-        blockedUntil.remove(key);
+        String userKey = key(clientIp, username);
+        String unknownUserKey = key(clientIp, UNKNOWN_USER);
+        failedAttempts.remove(userKey);
+        blockedUntil.remove(userKey);
+        failedAttempts.remove(unknownUserKey);
+        blockedUntil.remove(unknownUserKey);
     }
 
     public void clearAll() {
@@ -112,6 +118,28 @@ public class LoginAttemptService {
         while (!attempts.isEmpty() && attempts.peekFirst().isBefore(threshold)) {
             attempts.removeFirst();
         }
+    }
+
+    private void recordFailureForKey(String key, Instant now) {
+        Deque<Instant> attempts = failedAttempts.computeIfAbsent(key, ignored -> new ArrayDeque<>());
+        pruneOldAttempts(attempts, now);
+        attempts.addLast(now);
+        if (attempts.size() >= maxAttempts) {
+            blockedUntil.put(key, now.plus(window));
+            failedAttempts.remove(key);
+        }
+    }
+
+    private boolean isKeyBlocked(String key, Instant now) {
+        Instant until = blockedUntil.get(key);
+        if (until == null) {
+            return false;
+        }
+        if (until.isAfter(now)) {
+            return true;
+        }
+        blockedUntil.remove(key);
+        return false;
     }
 
     private String clientIp(HttpServletRequest request) {

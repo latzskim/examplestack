@@ -15,15 +15,19 @@ import com.simpleshop.inventory.domain.model.vo.WarehouseId;
 import com.simpleshop.shared.domain.model.vo.Address;
 import com.simpleshop.shared.domain.model.vo.Quantity;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
-import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -119,6 +123,28 @@ public class InventoryService implements CreateWarehouseUseCase, ReplenishStockU
 
     @Override
     @Transactional(readOnly = true)
+    @WithSpan("inventory.checkManyStockAvailability")
+    public Map<UUID, ProductAvailabilityView> checkMany(Collection<UUID> productIds) {
+        if (productIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<UUID, Integer> totalAvailableByProduct = stockRepository.sumAvailableByProductIds(productIds);
+        Map<UUID, Integer> totalReservedByProduct = stockRepository.sumReservedByProductIds(productIds);
+
+        Map<UUID, ProductAvailabilityView> result = new LinkedHashMap<>();
+        for (UUID productId : productIds) {
+            result.put(productId, new ProductAvailabilityView(
+                productId,
+                totalAvailableByProduct.getOrDefault(productId, 0),
+                totalReservedByProduct.getOrDefault(productId, 0)
+            ));
+        }
+        return result;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     @WithSpan("inventory.listWarehouseStock")
     public Page<StockView> list(GetWarehouseStockQuery query) {
         PageRequest pageable = PageRequest.of(query.page(), query.size());
@@ -154,9 +180,16 @@ public class InventoryService implements CreateWarehouseUseCase, ReplenishStockU
     public StockAllocationResult allocate(AllocateStockCommand command) {
         List<StockAllocationResult.Allocation> allocations = new ArrayList<>();
         List<Stock> stocksToSave = new ArrayList<>();
-        
+
+        List<UUID> productIds = command.items().stream()
+            .map(AllocateStockCommand.AllocationRequest::productId)
+            .distinct()
+            .toList();
+        Map<UUID, List<Stock>> availableStocksByProduct = stockRepository.findByProductIds(productIds).stream()
+            .collect(Collectors.groupingBy(Stock::getProductId));
+
         for (AllocateStockCommand.AllocationRequest request : command.items()) {
-            List<Stock> availableStocks = stockRepository.findByProductId(request.productId());
+            List<Stock> availableStocks = availableStocksByProduct.getOrDefault(request.productId(), List.of());
             
             Stock selectedStock = availableStocks.stream()
                 .filter(s -> s.getAvailableQuantity().getValue() >= request.quantity())

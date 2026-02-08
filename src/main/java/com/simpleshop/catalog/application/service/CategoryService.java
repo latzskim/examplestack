@@ -15,7 +15,11 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -64,17 +68,30 @@ public class CategoryService implements CreateCategoryUseCase, GetCategoryUseCas
         } else {
             categories = categoryRepository.findByParentId(null);
         }
-        return categories.stream().map(this::toCategoryView).toList();
+
+        List<UUID> parentIds = categories.stream()
+            .map(Category::getParentId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+        Map<UUID, String> parentNames = categoryRepository.findByIds(parentIds).stream()
+            .collect(Collectors.toMap(Category::getId, Category::getName, (left, right) -> left));
+
+        return categories.stream()
+            .map(category -> toCategoryView(category, parentNames.get(category.getParentId())))
+            .toList();
     }
     
     private CategoryView toCategoryView(Category category) {
-        String parentName = null;
-        if (category.getParentId() != null) {
-            parentName = categoryRepository.findById(CategoryId.of(category.getParentId()))
+        String parentName = category.getParentId() == null ? null :
+            categoryRepository.findById(CategoryId.of(category.getParentId()))
                 .map(Category::getName)
                 .orElse(null);
-        }
-        
+
+        return toCategoryView(category, parentName);
+    }
+
+    private CategoryView toCategoryView(Category category, String parentName) {
         return new CategoryView(
             category.getId(),
             category.getName(),
