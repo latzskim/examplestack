@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: false
+
+  modulith:
+    events:
+      jdbc:
+        schema-initialization:
+          enabled: true
+
+  mail:
+    host: localhost
+    port: 1025
+
+security:
+  login-rate-limit:
+    enabled: false
+
+logging:
+  level:
+    com.simpleshop: DEBUG
+    org.testcontainers: INFO
